@@ -22,18 +22,18 @@ export function UnlockRequestBubble({ thread }) {
   }
 
   return (
-    <div className="max-w-[88%] self-start rounded-xl rounded-bl-[3px] bg-brand-purple-light px-3.5 py-2.5">
-      <div className="mb-1 text-xs font-medium text-brand-purple-deep">個人聯絡資訊請求</div>
-      <div className="mb-1 text-xs text-brand-purple">
+    <div className="max-w-[88%] self-start rounded-xl rounded-bl-[3px] bg-brand-espresso-tint px-3.5 py-2.5">
+      <div className="mb-1 text-xs font-medium text-brand-espresso">個人聯絡資訊請求</div>
+      <div className="mb-1 text-xs text-brand-espresso/75">
         {thread.name} 希望取得你的個人聯絡資訊（姓名、電話、信箱）
       </div>
       {contactData.price ? (
         <>
-          <div className="my-1 text-lg font-medium text-brand-purple">NT$ {contactData.price}</div>
-          <div className="text-[11px] text-brand-purple">確認後對方支付此金額，你的聯絡資訊將揭露給對方</div>
+          <div className="my-1 text-lg font-medium text-primary">NT$ {contactData.price}</div>
+          <div className="text-[11px] text-brand-espresso/75">確認後對方支付此金額，你的聯絡資訊將揭露給對方</div>
         </>
       ) : (
-        <div className="text-[11px] text-brand-purple">你尚未設定個資定價，同意後將免費揭露聯絡資訊</div>
+        <div className="text-[11px] text-brand-espresso/75">你尚未設定個資定價，同意後將免費揭露聯絡資訊</div>
       )}
       <div className="mt-2 flex gap-2">
         <button

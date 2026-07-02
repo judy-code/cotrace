@@ -92,7 +92,7 @@ npm run preview   # 預覽 build 產出
 
 | 路徑 | 頁面元件 | 說明 |
 |---|---|---|
-| `/` | `pages/WelcomePage.jsx` | 歡迎頁，不套用 AppShell（沒有側邊欄/底部導覽） |
+| `/` | `pages/WelcomePage.jsx` | 歡迎頁，不套用 AppShell（沒有頂部導覽列） |
 | `/build` | `pages/BuildPage.jsx` | 建立名片三步驟精靈 |
 | `/explore` | `pages/ExplorePage.jsx` | 探索頁（人才列表），桌面版與詳情頁組成主從分割版面 |
 | `/explore/:talentId` | `pages/TalentDetailPage.jsx` | 人才詳情（`/explore` 的巢狀路由） |
@@ -104,7 +104,8 @@ npm run preview   # 預覽 build 產出
 | `/settings` | `pages/SettingsPage.jsx` | 設置頁 |
 
 `/` 以外的所有路由都包在 `components/layout/AppShell.jsx` 這個版面路由（layout route）底下，
-提供 TopBar／Sidebar（桌面）／BottomNav（手機）。彈窗類 UI（聯絡資料編輯、實名認證、
+提供頂部固定導覽列 `Navbar`（桌面版水平排列導覽項目；手機版收合成漢堡選單，從左側滑出，
+見 `Design.md`「導覽列」一節）。彈窗類 UI（聯絡資料編輯、實名認證、
 篩選面板、婉拒原因、資料夾選擇／管理、發送邀請）**都不是路由**，而是各元件內部的
 `useState` 控制開關，用 `ResponsiveModal` 統一處理桌面 Dialog／手機 Drawer 的切換。
 
@@ -271,7 +272,7 @@ src/
   hooks/        useAppState / useAppDispatch / useDebounce / useMediaQuery / useAutocomplete
   components/
     ui/         shadcn 自動產生的基礎元件（不要手動大改，要改用 `npx shadcn add` 重新產生或用 className 覆寫）
-    layout/     AppShell、TopBar、Sidebar、BottomNav、MasterDetailLayout、ResponsiveModal
+    layout/     AppShell、Navbar（頂部導覽列，桌面水平／手機漢堡選單）、MasterDetailLayout、ResponsiveModal
     common/     跨頁共用元件（CardView、TagChip、SkillTagInput、AutocompleteSearch、StepIndicator...）
     build/      建立名片精靈專用元件
     explore/    探索頁／人才詳情專用元件

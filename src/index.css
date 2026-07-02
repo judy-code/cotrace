@@ -6,7 +6,9 @@
 
 @theme inline {
     --font-heading: var(--font-sans);
-    --font-sans: 'system-ui', '-apple-system', 'Segoe UI', sans-serif;
+    /* 中文為主、英數混排：Inter 覆蓋拉丁字母/數字，Noto Sans TC 補上繁體中文字符，
+       兩者皆為 Google Fonts 開源字型，見 index.html 的 <link> 載入設定 */
+    --font-sans: 'Inter', 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -42,11 +44,11 @@
     --radius-3xl: calc(var(--radius) * 2.2);
     --radius-4xl: calc(var(--radius) * 2.6);
 
-    /* CoTrace 品牌延伸色票（原型 --pu/--pl 紫色系、狀態色） */
-    --color-brand-purple: var(--brand-purple);
-    --color-brand-purple-light: var(--brand-purple-light);
-    --color-brand-purple-deep: var(--brand-purple-deep);
-    --color-brand-purple-foreground: var(--brand-purple-foreground);
+    /* CoTrace 品牌延伸色票：logo 三色（米杏 / 赤陶橙 / 深棕）＋ 狀態色 */
+    --color-brand-cream: var(--brand-cream);
+    --color-brand-terracotta: var(--brand-terracotta);
+    --color-brand-espresso: var(--brand-espresso);
+    --color-brand-espresso-tint: var(--brand-espresso-tint);
     --color-status-pending-bg: var(--status-pending-bg);
     --color-status-pending-fg: var(--status-pending-fg);
     --color-status-verified-bg: var(--status-verified-bg);
@@ -55,46 +57,53 @@
 }
 
 :root {
-    /* 對應原型 cotrace_prototype.html 的 :root CSS 變數，詳見 Design.md 色票對應表 */
-    --background: #FBFBFD;        /* 原型 --bg */
-    --foreground: #1a1a18;        /* 原型 body 文字色 */
+    /* 色票取樣自新版 logo（public/logo-full.png）的三個核心色，詳見 Design.md 色票對應表 */
+    --background: #ffffff;        /* 主要版面維持白色，品牌色集中用在次要區塊（標籤、hover、側邊欄選中態等） */
+    --foreground: #241512;        /* 深棕黑，取自 logo 深棕色再加深，作為主要文字色 */
     --card: #ffffff;
-    --card-foreground: #1a1a18;
+    --card-foreground: #241512;
     --popover: #ffffff;
-    --popover-foreground: #1a1a18;
-    --primary: #b84b37;           /* 原型 --red */
+    --popover-foreground: #241512;
+    --primary: #b64937;           /* logo 赤陶橙（拼圖右上／左下色塊、COTRACE 字樣） */
     --primary-foreground: #ffffff;
-    --secondary: #F1EFE8;         /* 原型 --gl */
-    --secondary-foreground: #666666;
-    --muted: #F1EFE8;             /* 原型 --gl */
-    --muted-foreground: #888888;  /* 原型 .tm 文字色 */
-    --accent: #fdf0ee;            /* 原型 --rl */
-    --accent-foreground: #8a2e1e; /* 原型 --rd */
-    --destructive: #b84b37;       /* 原型 --red，button destructive 變體預設為柔和色調，恰好對應原型 .btn.dg */
+    --secondary: #f7eedd;         /* logo 米杏色（拼圖左上色塊） */
+    --secondary-foreground: #6b5645;
+    --muted: #f7eedd;
+    --muted-foreground: #7d6c5c;
+    --accent: #fbeae5;            /* primary 的淺色調，用於 hover／選中狀態底色 */
+    --accent-foreground: #7a2f1e;
+    --destructive: #b64937;       /* 與 primary 同色，button destructive 變體預設為柔和色調 */
     --destructive-foreground: #ffffff;
-    --border: rgba(0, 0, 0, 0.12); /* 原型 --bd */
-    --input: rgba(0, 0, 0, 0.12);
-    --ring: #b84b37;
-    --radius: 0.75rem;             /* 12px，對應原型 --r */
+    --border: rgba(36, 21, 18, 0.12);  /* 暖調邊框，取代純黑邊框以呼應品牌色 */
+    --input: rgba(36, 21, 18, 0.12);
+    --ring: #b64937;
+    --radius: 0.75rem;             /* 12px */
     --sidebar: #ffffff;
-    --sidebar-foreground: #1a1a18;
-    --sidebar-primary: #b84b37;
+    --sidebar-foreground: #241512;
+    --sidebar-primary: #b64937;
     --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #fdf0ee;
-    --sidebar-accent-foreground: #8a2e1e;
-    --sidebar-border: rgba(0, 0, 0, 0.12);
-    --sidebar-ring: #b84b37;
+    --sidebar-accent: #fbeae5;
+    --sidebar-accent-foreground: #7a2f1e;
+    --sidebar-border: rgba(36, 21, 18, 0.12);
+    --sidebar-ring: #b64937;
 
-    /* 額外自訂色票（原型中的紫色系與狀態色，非 shadcn 語意 token） */
-    --brand-purple: #7F77DD;             /* 原型 --pu */
-    --brand-purple-light: #EEEDFE;       /* 原型 --pl */
-    --brand-purple-deep: #26215C;        /* 解鎖訊息氣泡標題文字色 */
-    --brand-purple-foreground: #3C3489;  /* .tag.pu 文字色 */
-    --status-pending-bg: #FFF3E0;        /* 邀請「待回應」標籤 */
+    /* logo 原色（未經 shadcn 語意化調整前的三個核心色，供需要精確品牌色的場合使用，
+       例如 Logo 元件背景、行銷型版塊），數值直接取樣自 public/logo-full.png */
+    --brand-cream: #f7eedd;
+    --brand-terracotta: #b64937;
+    --brand-espresso: #47211e;
+    --brand-espresso-tint: #e7dcd4;      /* 深棕的淺色調，用於需要第三種品牌色階的場合（例如解鎖訊息氣泡），
+                                             與 --secondary（米杏）、--accent（赤陶橙淺調）三者互不混淆 */
+
+    /* 狀態色（功能語意色，非品牌識別色）：
+       - 待回應維持暖橙色調，本來就落在品牌色相範圍內
+       - 已實名驗證刻意把綠色調得偏灰橄欖（去飽和＋降彩度），保留「綠＝成功／已驗證」的通用意涵，
+         但不會像高飽和草綠那樣突兀地跳出暖色調色盤 */
+    --status-pending-bg: #FFF3E0;
     --status-pending-fg: #E65100;
-    --status-verified-bg: #eaf3de;       /* 實名認證完成狀態列 */
-    --status-verified-border: #97C459;
-    --status-verified-fg: #3B6D11;
+    --status-verified-bg: #eef0e4;
+    --status-verified-border: #a8ad8c;
+    --status-verified-fg: #55603a;
 }
 
 @layer base {

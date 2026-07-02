@@ -44,7 +44,7 @@ export function CardView({ talent, showWant }) {
         <div className="mb-1 text-xs text-muted-foreground">核心技能</div>
         <div className="flex flex-wrap gap-1.5">
           {(t.skills || []).map((s) => (
-            <Badge key={s} className="border-transparent bg-brand-purple-light text-brand-purple-foreground">
+            <Badge key={s} className="border-transparent bg-accent text-accent-foreground">
               {s}
             </Badge>
           ))}

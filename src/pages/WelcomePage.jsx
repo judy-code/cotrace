@@ -4,6 +4,7 @@ import { useGoogleLogin } from '@react-oauth/google'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { EmailAuthDialog } from '@/components/common/EmailAuthDialog'
+import { LogoStacked } from '@/components/common/Logo'
 import { useAppDispatch } from '@/hooks/useAppDispatch'
 import { fetchGoogleProfile, isGoogleLoginConfigured } from '@/lib/googleAuth'
 
@@ -100,9 +101,7 @@ export default function WelcomePage() {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-sm flex-col items-center justify-center px-8 py-10">
       <div className="mb-12 text-center">
-        <div className="mb-2 text-[36px] font-medium tracking-tight">
-          Co<span className="text-primary">Trace</span>
-        </div>
+        <LogoStacked size={128} className="mx-auto mb-4" />
         <div className="text-[15px] leading-[1.7] text-muted-foreground">
           翻轉求職邏輯
           <br />
