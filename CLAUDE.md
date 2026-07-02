@@ -39,7 +39,7 @@ CoTrace 是一個以「求才方」為主動、透過名片交換機制建立經
 | 對話（Chat） | ✅ 已實作 | `UnlockRequestBubble` 對應 PRD 4.6「請求個資揭露」；⚠️ 無「邀約面談」按鈕 |
 | 名片夾（Talent pool） | ✅ 已實作 | ⚠️ 無 200 張上限、無黑名單容量限制 |
 | **需求名片（Job Card）** | ✅ 已實作 | PRD 6.2，設定頁「需求名片」卡片 → `JobCardManagerSheet`（清單／新增／編輯／刪除，上限 10 張）→ `JobCardFormDialog`（8 個欄位表單）；欄位選項見 `data/jobCardOptions.js`，與人選名片的對應欄位選項刻意分開維護，數值不同 |
-| **探索視角切換**（我是人才／我想求才） | ❌ 未實作 | PRD 6.3，`ExplorePage` 目前只有單一視角 |
+| **探索視角切換**（我是人才／我想求才） | ⚠️ 部分實作 | PRD 6.3，`PerspectiveSwitcher`（探索頁左上角，左側滑出選單）可切換 `state.explorePerspective`；切到「我是人才」時 `ExplorePage` 改渲染 `JobPostGrid` 瀏覽 `jobCardPool`（新增的模擬資料，對應 talentPool.js 的定位，是「別人發布」的需求名片）。⚠️ 本輪刻意不做需求名片詳情頁與 PRD 6.4.1「關注」CTA（依賴下一項「關注機制」），也未依視角切換 `FilterDrawer` 欄位標籤／未套用預算篩選（需求名片預算是自由格式文字，非人選名片 salary 那種數字） |
 | **關注（Follow）** | ❌ 未實作 | PRD 6.4，作用於需求名片、會觸發通知，與「收藏」是不同機制 |
 | **通知系統重構** | ✅ 已實作 | PRD 6.5，`/invites` 頁面已改標題【通知】、底部導覽/側邊欄改鈴鐺 icon，拆「邀請/已邀請/關注」三子頁籤；「已邀請」子頁籤新增 `sentInvites` 狀態才有真實資料（見下方 action 清單）；「關注」子頁籤目前僅空狀態骨架，待 PRD 6.4 關注機制與 6.2 需求名片完成後才有資料來源 |
 | **面談與評分機制**（風險警示徽章、面談邀請卡片、多維度評分流程） | ❌ 未實作 | PRD 第五章整章，全新功能面，量體不小於 `BuildWizard` |
@@ -127,6 +127,7 @@ npm run preview   # 預覽 build 產出
 - 名片精靈：`SET_CARD_DATA`、`RESET_CARD_DATA`
 - 探索／收藏：`ADD_KEEP`、`REMOVE_TALENT`、`MARK_KEEP_INVITE_SENT`
 - 篩選：`SET_FILTER_STATE`、`RESET_FILTER`
+- 探索視角：`SET_EXPLORE_PERSPECTIVE`（`'hire'` 求才方視角／`'jobseek'` 找工作視角，預設 `'hire'`）
 - 名片夾／黑名單：`SET_CARDBOX_FOLDER`、`MOVE_CARDBOX_TO_BLOCK`、`MOVE_BLOCK_TO_CARDBOX`、`REMOVE_FROM_LIST`
 - 資料夾管理：`ADD_FOLDER`、`DELETE_FOLDER`
 - 邀請：`ACCEPT_INVITE`（原子性更新三個狀態區塊）、`REJECT_INVITE`、`SEND_INVITE`（探索頁
@@ -284,7 +285,8 @@ server/         Email 帳號登入用的後端 API（Express + MySQL），見上
 
 | 檔案 | 內容 |
 |---|---|
-| `talentPool.js` | 探索頁可瀏覽的 4 位範例人才 |
+| `talentPool.js` | 探索頁「我想求才」視角可瀏覽的 4 位範例人才 |
+| `jobCardPool.js` | 探索頁「我是人才」視角可瀏覽的 4 張範例需求名片（別人發布的，非自己的 `jobCards`） |
 | `invites.js` | 3 筆範例邀請（含完整的邀請人名片資料） |
 | `chatThreads.js` | 1 筆範例聊天室（帶一個尚未處理的個資解鎖請求） |
 | `companies.js` | 公司自動完成用的台灣公司名稱清單（本地比對，見下方「哪些是模擬的」） |
@@ -340,11 +342,11 @@ server/         Email 帳號登入用的後端 API（Express + MySQL），見上
 
 ### PRD 0.9.0 新功能（尚未排入開發，見上方「PRD 對照與目前實作範圍」）
 
-- **探索視角切換**：探索頁左上角切換【我是人才(探索需求)】／【我想求才(探索人才)】，
-  兩種視角的篩選欄位與卡片顯示內容不同，需要重新設計 `FilterDrawer`／`TalentCard` 的
-  資料模型使其可切換；視角切到「我是人才」後瀏覽的就是已完成的需求名片（Job Card）
+- **探索視角切換（剩餘部分）**：視角切換本身、需求名片列表瀏覽已完成，還缺：需求名片
+  詳情頁、`FilterDrawer` 依視角切換欄位標籤／支援預算篩選
 - **關注機制**：作用於需求名片，觸發通知，與現有「收藏」是不同機制，需分開實作；
-  `/invites`「關注」子頁籤已有 UI 骨架，待這項完成後才有資料來源
+  `/invites`「關注」子頁籤已有 UI 骨架、`JobPostGrid` 也已可瀏覽需求名片，待這項完成後
+  才有「關注」CTA 與資料來源
 - **面談與評分機制**：風險警示徽章（名片詳情頁＋探索卡片右上角，綠/黃/紅三色）、
   對話視窗內「邀約面談」按鈕與面談邀請卡片、面談後單題導引式多維度評分問卷、
   加權風險分數計算與回饋分布呈現（去識別化，不顯示個別評論）

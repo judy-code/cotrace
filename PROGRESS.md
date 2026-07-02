@@ -50,12 +50,29 @@
     跟 `BuildWizard`/`ContactEditDialog` 一致）
   - `npm run lint` + `npm run build` 皆過；同步更新 `CLAUDE.md` 落差表/action 清單/模擬資料清單
 
+## 2026-07-02（續 4）
+
+- **探索視角切換（部分完成）**：
+  - 新增 `state.explorePerspective`（`'hire'`／`'jobseek'`）+ `SET_EXPLORE_PERSPECTIVE` action
+  - 新增 `data/jobCardPool.js`：4 筆「別人發布」的需求名片範例，對應 `talentPool.js` 的定位，
+    跟自己在設定頁管理的 `jobCards` 分開
+  - 新增 `PerspectiveSwitcher`（探索頁左上角，點擊左側滑出選單，符合 PRD 6.3.1 UI 規格）、
+    `JobPostCard`/`JobPostGrid`（PRD 6.3.2 卡片顯示公司名稱/職稱/工作模式/預算）
+  - `ExplorePage.jsx` 依視角切換渲染 `TalentGrid` 或 `JobPostGrid`
+  - **刻意跳過本輪**（跟使用者確認過）：需求名片詳情頁 + PRD 6.4.1「關注」CTA
+    （點需求名片目前沒有詳情頁可點進去，只做到列表瀏覽）；`FilterDrawer` 沒有依視角換欄位標籤，
+    也沒有套用預算篩選（需求名片預算是自由格式文字如「140–160萬/年薪」「股權為主，可談」，
+    不是人選名片 `salary` 那種數字，無法直接套用現有的 `sal` 數字篩選邏輯）
+  - `npm run lint` + `npm run build` 皆過；同步更新 `CLAUDE.md`
+
 ## 下一步待完成（建議優先順序，細節見 `CLAUDE.md` →「PRD 對照與目前實作範圍」）
 
-1. **探索視角切換**：探索頁左上角切換【我是人才】/【我想求才】，需重新設計 `FilterDrawer`/`TalentCard` 資料模型；切到「我是人才」視角瀏覽的就是剛做好的需求名片（Job Card）
-2. **關注機制**：作用於需求名片，觸發通知，依賴第 1 項先完成，UI 骨架（`/invites`「關注」頁籤）已就緒
-3. **面談與評分機制**：風險徽章 + 面談邀請卡片 + 多維度評分問卷 —— 量體最大，PRD 第五章整章，建議排最後
-4. 補規則類小項：邀請每日額度限制、名片夾 200 張上限、黑名單容量
+1. **關注機制**：作用於需求名片，觸發通知，與「收藏」是不同機制；`/invites`「關注」頁籤
+   UI 骨架、`JobPostGrid` 需求名片瀏覽都已就緒，這項要補：需求名片詳情頁、「關注」CTA、
+   關注中/取消關注、Sender 收到關注通知
+2. **面談與評分機制**：風險徽章 + 面談邀請卡片 + 多維度評分問卷 —— 量體最大，PRD 第五章整章，建議排最後
+3. 補規則類小項：邀請每日額度限制、名片夾 200 張上限、黑名單容量
+4. 較小的收尾項：`FilterDrawer` 依探索視角切換欄位標籤／支援需求名片預算篩選
 
 ## 尚未確認事項（需要跟 PM/使用者再對齊）
 
