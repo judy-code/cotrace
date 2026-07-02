@@ -4,6 +4,7 @@ import { INITIAL_TALENT_POOL } from '@/data/talentPool'
 import { INITIAL_INVITES } from '@/data/invites'
 import { INITIAL_CHAT_THREADS } from '@/data/chatThreads'
 import { INITIAL_JOB_CARD_POOL } from '@/data/jobCardPool'
+import { INITIAL_RECEIVED_FOLLOWS } from '@/data/receivedFollows'
 
 export function blankCardData() {
   return {
@@ -72,6 +73,8 @@ export function createInitialState() {
     sentInvites: [],
     jobCards: [],
     jobCardPool: [...INITIAL_JOB_CARD_POOL],
+    followedJobCards: [],
+    receivedFollows: [...INITIAL_RECEIVED_FOLLOWS],
     explorePerspective: 'hire',
     chatThreads: [...INITIAL_CHAT_THREADS],
   }

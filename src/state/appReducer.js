@@ -39,6 +39,15 @@ export function appReducer(state, action) {
     case 'SET_EXPLORE_PERSPECTIVE':
       return { ...state, explorePerspective: action.value }
 
+    // ---- 關注（需求名片） ----
+    case 'FOLLOW_JOB_CARD': {
+      if (state.followedJobCards.some((j) => j.id === action.jobCard.id)) return state
+      return { ...state, followedJobCards: [...state.followedJobCards, action.jobCard] }
+    }
+    case 'UNFOLLOW_JOB_CARD': {
+      return { ...state, followedJobCards: state.followedJobCards.filter((j) => j.id !== action.id) }
+    }
+
     // ---- 名片夾 / 黑名單 ----
     case 'SET_CARDBOX_FOLDER': {
       return {
