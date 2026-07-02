@@ -41,7 +41,7 @@ CoTrace 是一個以「求才方」為主動、透過名片交換機制建立經
 | **需求名片（Job Card）** | ❌ 未實作 | PRD 6.2 全新模組，需求名片的建立/管理/欄位皆不存在 |
 | **探索視角切換**（我是人才／我想求才） | ❌ 未實作 | PRD 6.3，`ExplorePage` 目前只有單一視角 |
 | **關注（Follow）** | ❌ 未實作 | PRD 6.4，作用於需求名片、會觸發通知，與「收藏」是不同機制 |
-| **通知系統重構** | ❌ 未實作 | PRD 6.5，`/invites` 目前仍是單一「邀請」列表，非鈴鐺 icon 的【通知】＋子頁籤（邀請/已邀請/關注） |
+| **通知系統重構** | ✅ 已實作 | PRD 6.5，`/invites` 頁面已改標題【通知】、底部導覽/側邊欄改鈴鐺 icon，拆「邀請/已邀請/關注」三子頁籤；「已邀請」子頁籤新增 `sentInvites` 狀態才有真實資料（見下方 action 清單）；「關注」子頁籤目前僅空狀態骨架，待 PRD 6.4 關注機制與 6.2 需求名片完成後才有資料來源 |
 | **面談與評分機制**（風險警示徽章、面談邀請卡片、多維度評分流程） | ❌ 未實作 | PRD 第五章整章，全新功能面，量體不小於 `BuildWizard` |
 | 後臺管理模組 | ❌ 未實作 | MVP 前端優先，符合預期 |
 
@@ -96,8 +96,8 @@ npm run preview   # 預覽 build 產出
 | `/build` | `pages/BuildPage.jsx` | 建立名片三步驟精靈 |
 | `/explore` | `pages/ExplorePage.jsx` | 探索頁（人才列表），桌面版與詳情頁組成主從分割版面 |
 | `/explore/:talentId` | `pages/TalentDetailPage.jsx` | 人才詳情（`/explore` 的巢狀路由） |
-| `/invites` | `pages/InvitesPage.jsx` | 邀請列表 |
-| `/cardbox` | `pages/CardBoxPage.jsx` | 名片夾（名片夾／保留區／黑名單三分頁） |
+| `/invites` | `pages/InvitesPage.jsx` | 通知頁（邀請／已邀請／關注三分頁，對應 PRD 6.5；路徑本身沿用 `/invites`，未跟著改名） |
+| `/cardbox` | `pages/CardBoxPage.jsx` | 名片夾（名片夾／收藏／黑名單三分頁） |
 | `/chat` | `pages/ChatPage.jsx` | 聊天列表，桌面版與聊天視窗組成主從分割版面 |
 | `/chat/:threadId` | `pages/ChatThreadPage.jsx` | 聊天視窗（`/chat` 的巢狀路由） |
 | `/settings` | `pages/SettingsPage.jsx` | 設置頁 |
@@ -125,11 +125,14 @@ npm run preview   # 預覽 build 產出
 
 - 登入：`ENTER_APP`（進入 App，帶 `loggedIn` 與可選的 `user`）、`LOGOUT`
 - 名片精靈：`SET_CARD_DATA`、`RESET_CARD_DATA`
-- 探索／保留：`ADD_KEEP`、`REMOVE_TALENT`、`MARK_KEEP_INVITE_SENT`
+- 探索／收藏：`ADD_KEEP`、`REMOVE_TALENT`、`MARK_KEEP_INVITE_SENT`
 - 篩選：`SET_FILTER_STATE`、`RESET_FILTER`
 - 名片夾／黑名單：`SET_CARDBOX_FOLDER`、`MOVE_CARDBOX_TO_BLOCK`、`MOVE_BLOCK_TO_CARDBOX`、`REMOVE_FROM_LIST`
 - 資料夾管理：`ADD_FOLDER`、`DELETE_FOLDER`
-- 邀請：`ACCEPT_INVITE`（原子性更新三個狀態區塊）、`REJECT_INVITE`
+- 邀請：`ACCEPT_INVITE`（原子性更新三個狀態區塊）、`REJECT_INVITE`、`SEND_INVITE`（探索頁
+  `InviteForm`／名片夾「收藏」分頁 `CardBoxInviteDialog` 送出邀請時寫入 `sentInvites`，
+  供 `/invites`「已邀請」子頁籤顯示；因為是本機模擬、沒有對方帳號可真的回應，狀態固定為
+  `pending`，UI 顯示「邀請中」）
 - 聊天：`ADD_MESSAGE`、`SET_THREAD_READ`、`SET_THREAD_UNLOCK`
 - 設置：`SET_CONTACT_DATA`、`SET_VERIFIED`、`SET_PERMISSION`
 
@@ -267,7 +270,7 @@ src/
     common/     跨頁共用元件（CardView、TagChip、SkillTagInput、AutocompleteSearch、StepIndicator...）
     build/      建立名片精靈專用元件
     explore/    探索頁／人才詳情專用元件
-    invites/    邀請頁專用元件
+    invites/    通知頁（/invites）專用元件
     cardbox/    名片夾頁專用元件
     chat/       聊天頁專用元件
     settings/   設置頁專用元件
@@ -339,9 +342,8 @@ server/         Email 帳號登入用的後端 API（Express + MySQL），見上
 - **探索視角切換**：探索頁左上角切換【我是人才(探索需求)】／【我想求才(探索人才)】，
   兩種視角的篩選欄位與卡片顯示內容不同，需要重新設計 `FilterDrawer`／`TalentCard` 的
   資料模型使其可切換
-- **關注機制**：作用於需求名片，觸發通知，與現有「收藏／保留區」是不同機制，需分開實作
-- **通知系統重構**：`/invites` 頁改名為【通知】、icon 換成鈴鐺、拆成「邀請／已邀請／關注」
-  三個子頁籤（`BottomNav`／`Sidebar`／`TopBar` 都要跟著調整）
+- **關注機制**：作用於需求名片，觸發通知，與現有「收藏」是不同機制，需分開實作；
+  `/invites`「關注」子頁籤已有 UI 骨架，待這項完成後才有資料來源
 - **面談與評分機制**：風險警示徽章（名片詳情頁＋探索卡片右上角，綠/黃/紅三色）、
   對話視窗內「邀約面談」按鈕與面談邀請卡片、面談後單題導引式多維度評分問卷、
   加權風險分數計算與回饋分布呈現（去識別化，不顯示個別評論）

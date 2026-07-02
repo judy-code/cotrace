@@ -59,13 +59,13 @@ utility class（例如 `--primary` 會產生 `bg-primary`／`text-primary`／`bo
 | 中斷點 | 觸發變化 |
 |---|---|
 | `< 768px`（手機） | 底部導覽列（`BottomNav`）、單欄版面、詳情頁以全螢幕滑出方式呈現 |
-| `md`（≥768px，平板） | 側邊欄（`Sidebar`）取代底部導覽列；探索頁網格 1→2 欄；名片夾／邀請頁加大留白 |
+| `md`（≥768px，平板） | 側邊欄（`Sidebar`）取代底部導覽列；探索頁網格 1→2 欄；名片夾／通知頁加大留白 |
 | `lg`（≥1024px，桌面） | 探索頁與聊天頁啟用主從分割版面（`MasterDetailLayout`）：左側固定約 380px 寬清單欄 + 右側詳情／聊天視窗欄，兩者同時顯示 |
 
 **探索頁網格欄數的設計取捨**：原計畫設想「`lg` 時網格變 3 欄」，但實際上 `lg` 同時會啟用
 主從分割版面、左側清單欄固定寬度約 380px，塞不下 3 欄卡片。因此改為：`md`（尚未進入分割
 模式，清單佔滿版面寬度）時 2 欄，`lg`（已進入分割模式、清單欄變窄）時退回 1 欄，
-以清單欄實際可用寬度為準，而不是單純依螢幕寬度決定欄數。名片夾／邀請頁在所有寬度下
+以清單欄實際可用寬度為準，而不是單純依螢幕寬度決定欄數。名片夾／通知頁在所有寬度下
 維持單欄（僅加大留白），因為每列內容較密集、文字量大，不適合切成多欄。
 
 ## 彈窗策略
@@ -79,7 +79,7 @@ utility class（例如 `--primary` 會產生 `bg-primary`／`text-primary`／`bo
   對應原型 `showVerifyModal(parentOv)` 的巢狀彈層行為）
 - 婉拒原因（`RejectReasonDialog`）
 - 資料夾選擇（`FolderPickerDialog`）／資料夾管理（`FolderManagerSheet`）
-- 名片夾「保留區」的發送邀請彈窗（`CardBoxInviteDialog`）
+- 名片夾「收藏」分頁的發送邀請彈窗（`CardBoxInviteDialog`）
 - 各處點開一張名片查看完整內容時（`CardView` 包在 `ResponsiveModal` 裡）
 
 **例外**：篩選面板（`FilterDrawer`）不用 `ResponsiveModal`，而是直接用 shadcn
@@ -120,7 +120,7 @@ utility class（例如 `--primary` 會產生 `bg-primary`／`text-primary`／`bo
 |---|---|
 | 返回箭頭 | `ChevronLeft` |
 | 篩選 | `SlidersHorizontal` |
-| 探索／邀請／名片夾／聊天（底部導覽、側邊欄） | `Search` / `Inbox` / `CreditCard` / `MessageCircle` |
+| 探索／通知／名片夾／聊天（底部導覽、側邊欄） | `Search` / `Bell` / `CreditCard` / `MessageCircle` |
 | 設置 | `Settings` |
 | 鎖頭（Want 區塊鎖定提示） | `Lock` |
 | 上傳附件 | `Paperclip` |
