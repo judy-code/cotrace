@@ -29,6 +29,21 @@ export function blankCardData() {
   }
 }
 
+export function blankJobCardData() {
+  return {
+    id: null,
+    title: '',
+    company: '',
+    workMode: [],
+    budget: '',
+    timeline: '',
+    location: '',
+    level: '',
+    skills: [],
+    description: '',
+  }
+}
+
 export function createInitialState() {
   return {
     isLoggedIn: false,
@@ -54,6 +69,7 @@ export function createInitialState() {
     talentPool: [...INITIAL_TALENT_POOL],
     invites: [...INITIAL_INVITES],
     sentInvites: [],
+    jobCards: [],
     chatThreads: [...INITIAL_CHAT_THREADS],
   }
 }

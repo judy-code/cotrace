@@ -1,4 +1,5 @@
 import { blankCardData } from './initialState'
+import { MAX_JOB_CARDS } from '@/data/jobCardOptions'
 
 export function appReducer(state, action) {
   switch (action.type) {
@@ -133,6 +134,21 @@ export function appReducer(state, action) {
         status: 'pending',
       }
       return { ...state, sentInvites: [...state.sentInvites, newSentInvite] }
+    }
+
+    // ---- 需求名片 ----
+    case 'ADD_JOB_CARD': {
+      if (state.jobCards.length >= MAX_JOB_CARDS) return state
+      return { ...state, jobCards: [...state.jobCards, { ...action.payload, id: Date.now() }] }
+    }
+    case 'UPDATE_JOB_CARD': {
+      return {
+        ...state,
+        jobCards: state.jobCards.map((c) => (c.id === action.payload.id ? action.payload : c)),
+      }
+    }
+    case 'DELETE_JOB_CARD': {
+      return { ...state, jobCards: state.jobCards.filter((c) => c.id !== action.id) }
     }
 
     // ---- 聊天 ----
