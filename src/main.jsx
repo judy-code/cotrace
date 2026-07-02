@@ -6,16 +6,19 @@ import './index.css'
 import App from './App.jsx'
 import { AppProvider } from '@/state/AppContext'
 import { Toaster } from '@/components/ui/sonner'
+import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ''}>
-      <HashRouter>
-        <AppProvider>
-          <App />
-          <Toaster position="bottom-center" />
-        </AppProvider>
-      </HashRouter>
-    </GoogleOAuthProvider>
+    <ErrorBoundary>
+      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ''}>
+        <HashRouter>
+          <AppProvider>
+            <App />
+            <Toaster position="bottom-center" />
+          </AppProvider>
+        </HashRouter>
+      </GoogleOAuthProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )
