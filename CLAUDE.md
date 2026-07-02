@@ -39,9 +39,9 @@ CoTrace 是一個以「求才方」為主動、透過名片交換機制建立經
 | 對話（Chat） | ✅ 已實作 | `UnlockRequestBubble` 對應 PRD 4.6「請求個資揭露」；⚠️ 無「邀約面談」按鈕 |
 | 名片夾（Talent pool） | ✅ 已實作 | ⚠️ 無 200 張上限、無黑名單容量限制 |
 | **需求名片（Job Card）** | ✅ 已實作 | PRD 6.2，設定頁「需求名片」卡片 → `JobCardManagerSheet`（清單／新增／編輯／刪除，上限 10 張）→ `JobCardFormDialog`（8 個欄位表單）；欄位選項見 `data/jobCardOptions.js`，與人選名片的對應欄位選項刻意分開維護，數值不同 |
-| **探索視角切換**（我是人才／我想求才） | ⚠️ 部分實作 | PRD 6.3，`PerspectiveSwitcher`（探索頁左上角，左側滑出選單）可切換 `state.explorePerspective`；切到「我是人才」時 `ExplorePage` 改渲染 `JobPostGrid` 瀏覽 `jobCardPool`（新增的模擬資料，對應 talentPool.js 的定位，是「別人發布」的需求名片）。⚠️ 本輪刻意不做需求名片詳情頁與 PRD 6.4.1「關注」CTA（依賴下一項「關注機制」），也未依視角切換 `FilterDrawer` 欄位標籤／未套用預算篩選（需求名片預算是自由格式文字，非人選名片 salary 那種數字） |
-| **關注（Follow）** | ❌ 未實作 | PRD 6.4，作用於需求名片、會觸發通知，與「收藏」是不同機制 |
-| **通知系統重構** | ✅ 已實作 | PRD 6.5，`/invites` 頁面已改標題【通知】、底部導覽/側邊欄改鈴鐺 icon，拆「邀請/已邀請/關注」三子頁籤；「已邀請」子頁籤新增 `sentInvites` 狀態才有真實資料（見下方 action 清單）；「關注」子頁籤目前僅空狀態骨架，待 PRD 6.4 關注機制與 6.2 需求名片完成後才有資料來源 |
+| **探索視角切換**（我是人才／我想求才） | ✅ 已實作 | PRD 6.3，`PerspectiveSwitcher`（探索頁左上角，左側滑出選單）可切換 `state.explorePerspective`；切到「我是人才」時 `ExplorePage` 改渲染 `JobPostGrid` 瀏覽 `jobCardPool`，點卡片進 `/explore/job/:jobId` 詳情頁（含「關注」CTA，見下一列）。⚠️ 已知落差：`FilterDrawer` 未依視角切換欄位標籤／未套用預算篩選（需求名片預算是自由格式文字，非人選名片 salary 那種數字） |
+| **關注（Follow）** | ✅ 已實作 | PRD 6.4：需求名片詳情頁（`/explore/job/:jobId`）有「關注」按鈕（`FOLLOW_JOB_CARD`/`UNFOLLOW_JOB_CARD`，`state.followedJobCards`，同一需求不可重複關注）；設定頁「關注中的需求」可取消關注；Sender 端「通知→關注」用 `data/receivedFollows.js` 模擬別人關注自己需求名片的通知（跟 `invites.js` 一樣是預先 seed 的模擬資料，見下方說明），點頭像/名稱可查看人選名片並執行邀請/收藏/跳過；探索頁「我想求才」視角的人才列表會把 `receivedFollows` 中的關注人才排到前面（`TalentGrid.jsx`），符合 PRD 6.4.2「優先顯示」 |
+| **通知系統重構** | ✅ 已實作 | PRD 6.5，`/invites` 頁面已改標題【通知】、底部導覽/側邊欄改鈴鐺 icon，拆「邀請/已邀請/關注」三子頁籤；「已邀請」子頁籤用 `sentInvites` 狀態顯示真實資料；「關注」子頁籤用 `receivedFollows` 顯示模擬通知（見上一列說明） |
 | **面談與評分機制**（風險警示徽章、面談邀請卡片、多維度評分流程） | ❌ 未實作 | PRD 第五章整章，全新功能面，量體不小於 `BuildWizard` |
 | 後臺管理模組 | ❌ 未實作 | MVP 前端優先，符合預期 |
 
@@ -96,6 +96,7 @@ npm run preview   # 預覽 build 產出
 | `/build` | `pages/BuildPage.jsx` | 建立名片三步驟精靈 |
 | `/explore` | `pages/ExplorePage.jsx` | 探索頁（人才列表），桌面版與詳情頁組成主從分割版面 |
 | `/explore/:talentId` | `pages/TalentDetailPage.jsx` | 人才詳情（`/explore` 的巢狀路由） |
+| `/explore/job/:jobId` | `pages/JobPostDetailPage.jsx` | 需求名片詳情（`/explore` 的巢狀路由，「我是人才」視角用，含「關注」CTA） |
 | `/invites` | `pages/InvitesPage.jsx` | 通知頁（邀請／已邀請／關注三分頁，對應 PRD 6.5；路徑本身沿用 `/invites`，未跟著改名） |
 | `/cardbox` | `pages/CardBoxPage.jsx` | 名片夾（名片夾／收藏／黑名單三分頁） |
 | `/chat` | `pages/ChatPage.jsx` | 聊天列表，桌面版與聊天視窗組成主從分割版面 |
@@ -128,6 +129,7 @@ npm run preview   # 預覽 build 產出
 - 探索／收藏：`ADD_KEEP`、`REMOVE_TALENT`、`MARK_KEEP_INVITE_SENT`
 - 篩選：`SET_FILTER_STATE`、`RESET_FILTER`
 - 探索視角：`SET_EXPLORE_PERSPECTIVE`（`'hire'` 求才方視角／`'jobseek'` 找工作視角，預設 `'hire'`）
+- 關注：`FOLLOW_JOB_CARD`（`state.followedJobCards`，依 id 去重避免重複關注）、`UNFOLLOW_JOB_CARD`
 - 名片夾／黑名單：`SET_CARDBOX_FOLDER`、`MOVE_CARDBOX_TO_BLOCK`、`MOVE_BLOCK_TO_CARDBOX`、`REMOVE_FROM_LIST`
 - 資料夾管理：`ADD_FOLDER`、`DELETE_FOLDER`
 - 邀請：`ACCEPT_INVITE`（原子性更新三個狀態區塊）、`REJECT_INVITE`、`SEND_INVITE`（探索頁
@@ -287,6 +289,7 @@ server/         Email 帳號登入用的後端 API（Express + MySQL），見上
 |---|---|
 | `talentPool.js` | 探索頁「我想求才」視角可瀏覽的 4 位範例人才 |
 | `jobCardPool.js` | 探索頁「我是人才」視角可瀏覽的 4 張範例需求名片（別人發布的，非自己的 `jobCards`） |
+| `receivedFollows.js` | 2 筆模擬「別人關注你需求名片」的通知，`talentId` 對應 `talentPool.js` 既有人才 |
 | `invites.js` | 3 筆範例邀請（含完整的邀請人名片資料） |
 | `chatThreads.js` | 1 筆範例聊天室（帶一個尚未處理的個資解鎖請求） |
 | `companies.js` | 公司自動完成用的台灣公司名稱清單（本地比對，見下方「哪些是模擬的」） |
@@ -339,14 +342,12 @@ server/         Email 帳號登入用的後端 API（Express + MySQL），見上
 - 多語系（目前僅繁體中文）
 - `npm run build` 目前有「單一 JS chunk 超過 500KB」的警告，量體還在合理範圍，
   但未來頁面變多時可考慮用 `React.lazy()` 對各 `pages/*.jsx` 做 code splitting
+- `FilterDrawer` 沒有依探索視角切換欄位標籤（PRD 4.3.1 求才方／找工作兩視角欄位標籤略有不同），
+  也沒有套用需求名片的預算篩選（需求名片預算是自由格式文字如「140–160萬/年薪」，
+  不是人選名片 `salary` 那種數字，現有 `sal` 篩選邏輯無法直接套用）
 
 ### PRD 0.9.0 新功能（尚未排入開發，見上方「PRD 對照與目前實作範圍」）
 
-- **探索視角切換（剩餘部分）**：視角切換本身、需求名片列表瀏覽已完成，還缺：需求名片
-  詳情頁、`FilterDrawer` 依視角切換欄位標籤／支援預算篩選
-- **關注機制**：作用於需求名片，觸發通知，與現有「收藏」是不同機制，需分開實作；
-  `/invites`「關注」子頁籤已有 UI 骨架、`JobPostGrid` 也已可瀏覽需求名片，待這項完成後
-  才有「關注」CTA 與資料來源
 - **面談與評分機制**：風險警示徽章（名片詳情頁＋探索卡片右上角，綠/黃/紅三色）、
   對話視窗內「邀約面談」按鈕與面談邀請卡片、面談後單題導引式多維度評分問卷、
   加權風險分數計算與回饋分布呈現（去識別化，不顯示個別評論）

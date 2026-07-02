@@ -65,14 +65,30 @@
     不是人選名片 `salary` 那種數字，無法直接套用現有的 `sal` 數字篩選邏輯）
   - `npm run lint` + `npm run build` 皆過；同步更新 `CLAUDE.md`
 
+## 2026-07-02（續 5）
+
+- **關注機制（已完成）**：
+  - 新增需求名片詳情頁 `/explore/job/:jobId`（`JobPostDetailPanel`/`JobPostDetailPage`），
+    有「關注」/「已關注（取消）」切換按鈕；`JobPostCard` 從靜態 div 改成可點擊按鈕導頁進來
+  - 新增 `state.followedJobCards` + `FOLLOW_JOB_CARD`（依 id 去重，符合 PRD 6.4.1「不可重複
+    關注」）/`UNFOLLOW_JOB_CARD`；設定頁新增「關注中的需求」卡片 → `FollowedJobsManagerSheet`
+    可取消關注
+  - Sender 端通知：跟使用者確認過，這個 app 是單一使用者本機模擬、沒有其他帳號可以真的
+    關注你，所以跟 `invites.js` 一樣新增 `data/receivedFollows.js` 預先 seed 2 筆模擬通知
+    （`talentId` 對應 `talentPool.js` 既有人才），`/invites`「關注」頁籤改用
+    `FollowNotificationRow` 顯示，點頭像/名稱可查看人選名片＋執行邀請/收藏/跳過
+    （符合 PRD 6.4.3，重用 `CardBoxInviteDialog`）
+  - PRD 6.4.2「優先顯示篩選相符的關注人才」：跟使用者確認過也一起做，`TalentGrid.jsx`
+    把 `receivedFollows` 中的人才排到篩選結果最前面，並在 `TalentCard` 加一行「關注了你的
+    需求名片」提示；「除非已跳過」不用額外處理，因為跳過本來就會把人才從 `talentPool`
+    移除，自然不會出現在排序結果裡
+  - `npm run lint` + `npm run build` 皆過；同步更新 `CLAUDE.md`（含新路由 `/explore/job/:jobId`）
+
 ## 下一步待完成（建議優先順序，細節見 `CLAUDE.md` →「PRD 對照與目前實作範圍」）
 
-1. **關注機制**：作用於需求名片，觸發通知，與「收藏」是不同機制；`/invites`「關注」頁籤
-   UI 骨架、`JobPostGrid` 需求名片瀏覽都已就緒，這項要補：需求名片詳情頁、「關注」CTA、
-   關注中/取消關注、Sender 收到關注通知
-2. **面談與評分機制**：風險徽章 + 面談邀請卡片 + 多維度評分問卷 —— 量體最大，PRD 第五章整章，建議排最後
-3. 補規則類小項：邀請每日額度限制、名片夾 200 張上限、黑名單容量
-4. 較小的收尾項：`FilterDrawer` 依探索視角切換欄位標籤／支援需求名片預算篩選
+1. **面談與評分機制**：風險徽章 + 面談邀請卡片 + 多維度評分問卷 —— 量體最大，PRD 第五章整章，建議排最後（目前唯一還沒動工的 PRD 0.9.0 新功能大項）
+2. 補規則類小項：邀請每日額度限制、名片夾 200 張上限、黑名單容量
+3. 較小的收尾項：`FilterDrawer` 依探索視角切換欄位標籤／支援需求名片預算篩選
 
 ## 尚未確認事項（需要跟 PM/使用者再對齊）
 
