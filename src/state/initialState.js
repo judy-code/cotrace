@@ -3,6 +3,7 @@ import { FOLDER_DEFAULTS } from '@/data/folderDefaults'
 import { INITIAL_TALENT_POOL } from '@/data/talentPool'
 import { INITIAL_INVITES } from '@/data/invites'
 import { INITIAL_CHAT_THREADS } from '@/data/chatThreads'
+import { INITIAL_JOB_CARD_POOL } from '@/data/jobCardPool'
 
 export function blankCardData() {
   return {
@@ -70,6 +71,8 @@ export function createInitialState() {
     invites: [...INITIAL_INVITES],
     sentInvites: [],
     jobCards: [],
+    jobCardPool: [...INITIAL_JOB_CARD_POOL],
+    explorePerspective: 'hire',
     chatThreads: [...INITIAL_CHAT_THREADS],
   }
 }

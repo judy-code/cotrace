@@ -35,6 +35,10 @@ export function appReducer(state, action) {
     case 'RESET_FILTER':
       return { ...state, filterState: { titleKw: '', skill: '', loc: '', sal: '' } }
 
+    // ---- 探索視角 ----
+    case 'SET_EXPLORE_PERSPECTIVE':
+      return { ...state, explorePerspective: action.value }
+
     // ---- 名片夾 / 黑名單 ----
     case 'SET_CARDBOX_FOLDER': {
       return {
