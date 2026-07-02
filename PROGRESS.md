@@ -84,6 +84,40 @@
     移除，自然不會出現在排序結果裡
   - `npm run lint` + `npm run build` 皆過；同步更新 `CLAUDE.md`（含新路由 `/explore/job/:jobId`）
 
+## 2026-07-02（續 6）
+
+- **品牌識別／設計系統改版（已完成）**：
+  - 套用使用者提供的新版 CoTrace logo（拼圖圖標＋COTRACE 字樣，`logo.webp`）：用 sharp
+    程式化取樣像素色值（非肉眼估色），裁切出 `public/logo-mark.png`（純圖標）／
+    `public/logo-full.png`（堆疊版）／favicon 系列／apple-touch-icon，新增
+    `components/common/Logo.jsx`（`LogoMark`/`Logo`/`LogoStacked`）取代原本用 CSS
+    手刻的「Co ＋ 色彩化 Trace」純文字 logotype
+  - 色彩系統改用直接取樣自 logo 的品牌色（赤陶橙 `#b64937`／米杏 `#f7eedd`／深棕
+    `#47211e`），逐一驗算 WCAG AA 對比度後寫入 `src/index.css` 語意 token
+  - 字體改用 Google Fonts（Inter + Noto Sans TC），對應中文為主、英數混排的需求
+  - 依 Apple Human Interface Guidelines 精神（clarity/deference/depth）在 `Design.md`
+    補上「設計原則」一節
+  - 使用者反饋後二次調整：**主要背景改回純白**（品牌色只用在標籤／hover 等次要區塊，
+    不佔滿整體版面）、**移除紫色系**（`brand-purple*` token 全刪，核心技能標籤改用赤陶橙
+    `accent`、解鎖訊息氣泡新增 `brand-espresso-tint`）、**頭像色票**從藍／紫／綠混雜
+    改成赤陶橙→橙棕→琥珀金→深棕→沙米五階暖色調、**已驗證徽章**綠色調降飽和度（保留
+    「綠＝已驗證」語意但融入暖色調色盤），待回應橙色維持不變（本來就在品牌色相範圍內）
+  - `npm run lint` + `npm run build` 皆過，並用 Playwright 對歡迎頁／探索頁／名片詳情／
+    通知／聊天／設置頁截圖驗證
+- **導覽列改版（已完成）**：
+  - 使用者反饋「要一般網頁規範格式，navbar 在上方，手機版才到左側」——把桌面左側常駐
+    `Sidebar` ＋ 手機底部 `BottomNav` 的 App 化版型，改成頂部固定導覽列 `Navbar.jsx`
+    （桌面版水平排列導覽項目；手機版收合成漢堡選單，用 `Sheet side="left"` 從左側滑出，
+    取代原本的底部分頁列）
+  - 刪除 `Sidebar.jsx`／`TopBar.jsx`／`BottomNav.jsx` 三元件，合併成單一 `Navbar.jsx`；
+    `AppShell.jsx` 簡化為 `Navbar` + `Outlet`
+  - `npm run lint` + `npm run build` 皆過，Playwright 驗證桌面水平導覽與手機漢堡選單／
+    左側抽屜的展開／導頁行為
+  - 同步更新 `Design.md`（新增「品牌識別」「導覽列」章節、色票對應表、響應式中斷點）與
+    `CLAUDE.md`（路由表說明、目錄結構）
+- **已提交**：`git commit 91d8e8a`「品牌改版：套用新版 CoTrace logo、重製色彩與字體系統、
+  導覽列改為頂部橫向排列」，尚未 push 到遠端
+
 ## 下一步待完成（建議優先順序，細節見 `CLAUDE.md` →「PRD 對照與目前實作範圍」）
 
 1. **面談與評分機制**：風險徽章 + 面談邀請卡片 + 多維度評分問卷 —— 量體最大，PRD 第五章整章，建議排最後（目前唯一還沒動工的 PRD 0.9.0 新功能大項）
