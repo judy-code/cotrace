@@ -20,6 +20,7 @@ export function CardBoxInviteDialog({ open, onOpenChange, talent }) {
       return
     }
     dispatch({ type: 'MARK_KEEP_INVITE_SENT', id: talent.id })
+    dispatch({ type: 'SEND_INVITE', talent, why, position, salary })
     onOpenChange(false)
     setWhy('')
     setPosition('')

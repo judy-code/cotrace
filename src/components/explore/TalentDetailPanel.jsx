@@ -48,7 +48,7 @@ export function TalentDetailPanel({ talent }) {
             發送邀請
           </Button>
         </div>
-        {showInviteForm && <InviteForm onSent={() => navigate('/explore')} />}
+        {showInviteForm && <InviteForm talent={talent} onSent={() => navigate('/explore')} />}
       </div>
     </div>
   )

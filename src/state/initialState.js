@@ -53,6 +53,7 @@ export function createInitialState() {
     cardData: blankCardData(),
     talentPool: [...INITIAL_TALENT_POOL],
     invites: [...INITIAL_INVITES],
+    sentInvites: [],
     chatThreads: [...INITIAL_CHAT_THREADS],
   }
 }

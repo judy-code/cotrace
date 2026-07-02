@@ -118,6 +118,22 @@ export function appReducer(state, action) {
         ),
       }
     }
+    case 'SEND_INVITE': {
+      const { talent, why, position, salary } = action
+      const newSentInvite = {
+        id: Date.now(),
+        talentId: talent.id,
+        name: talent.name,
+        title: talent.title,
+        company: talent.company,
+        ai: talent.ai,
+        why,
+        position,
+        salary,
+        status: 'pending',
+      }
+      return { ...state, sentInvites: [...state.sentInvites, newSentInvite] }
+    }
 
     // ---- 聊天 ----
     case 'ADD_MESSAGE': {

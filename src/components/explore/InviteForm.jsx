@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { FieldGroup } from '@/components/common/FieldGroup'
+import { useAppDispatch } from '@/hooks/useAppDispatch'
 
-export function InviteForm({ onSent }) {
+export function InviteForm({ talent, onSent }) {
+  const dispatch = useAppDispatch()
   const [why, setWhy] = useState('')
   const [position, setPosition] = useState('')
   const [salary, setSalary] = useState('')
@@ -16,6 +18,7 @@ export function InviteForm({ onSent }) {
       setError('請填寫邀請原因')
       return
     }
+    dispatch({ type: 'SEND_INVITE', talent, why, position, salary })
     toast('邀請已送出')
     onSent?.()
   }
