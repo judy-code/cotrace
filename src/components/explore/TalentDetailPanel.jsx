@@ -14,7 +14,7 @@ export function TalentDetailPanel({ talent }) {
 
   const handleKeep = () => {
     dispatch({ type: 'ADD_KEEP', talent })
-    toast(`${talent.name} 已加入保留區`)
+    toast(`${talent.name} 已加入收藏`)
   }
 
   const handleSkip = () => {
@@ -39,7 +39,7 @@ export function TalentDetailPanel({ talent }) {
         <CardView talent={talent} showWant={false} />
         <div className="mt-4 flex gap-2">
           <Button variant="outline" className="flex-1" onClick={handleKeep}>
-            保留
+            收藏
           </Button>
           <Button variant="outline" className="flex-1" onClick={handleSkip}>
             跳過

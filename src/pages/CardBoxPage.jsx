@@ -9,7 +9,7 @@ import { FolderManagerSheet } from '@/components/cardbox/FolderManagerSheet'
 
 const TABS = [
   { value: 'main', label: '名片夾', emptyText: '尚無名片，同意邀請後會自動加入' },
-  { value: 'keep', label: '保留區', emptyText: '保留區是空的' },
+  { value: 'keep', label: '收藏', emptyText: '收藏區是空的' },
   { value: 'block', label: '黑名單', emptyText: '黑名單是空的' },
 ]
 
