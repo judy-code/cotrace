@@ -174,11 +174,17 @@ export function AuthDialog() {
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="mb-4 w-full">
-          <TabsTrigger className="flex-1" value="login">
+        <TabsList className="mb-5 h-11 w-full rounded-full bg-muted p-1">
+          <TabsTrigger
+            className="flex-1 rounded-full data-active:shadow-md"
+            value="login"
+          >
             登入
           </TabsTrigger>
-          <TabsTrigger className="flex-1" value="register">
+          <TabsTrigger
+            className="flex-1 rounded-full data-active:shadow-md"
+            value="register"
+          >
             註冊
           </TabsTrigger>
         </TabsList>

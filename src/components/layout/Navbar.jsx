@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
-import { Lock, Menu, Settings } from 'lucide-react'
+import { Lock, LogIn, Menu, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAppState } from '@/hooks/useAppState'
 import { useAppDispatch } from '@/hooks/useAppDispatch'
@@ -63,7 +63,7 @@ export function Navbar() {
                   {authRequired && !isLoggedIn && (
                     <Lock className="ml-auto size-3.5 shrink-0 text-muted-foreground" strokeWidth={1.5} />
                   )}
-                  {badge && pendingCount > 0 && (
+                  {badge && isLoggedIn && pendingCount > 0 && (
                     <span className="animate-in zoom-in-50 ml-auto flex size-5 items-center justify-center rounded-full bg-primary text-[11px] font-medium text-primary-foreground duration-300">
                       {pendingCount}
                     </span>
@@ -80,12 +80,13 @@ export function Navbar() {
                 </NavLink>
               ) : (
                 <Button
-                  className="w-full"
+                  className="w-full gap-2"
                   onClick={() => {
                     setMenuOpen(false)
                     openAuthDialog()
                   }}
                 >
+                  <LogIn className="size-4" strokeWidth={1.5} />
                   登入 / 註冊
                 </Button>
               )}
@@ -106,7 +107,7 @@ export function Navbar() {
             {authRequired && !isLoggedIn && (
               <Lock className="size-3 text-muted-foreground" strokeWidth={1.5} />
             )}
-            {badge && pendingCount > 0 && (
+            {badge && isLoggedIn && pendingCount > 0 && (
               <span className="animate-in zoom-in-50 flex size-4.5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground duration-300">
                 {pendingCount}
               </span>
@@ -121,8 +122,9 @@ export function Navbar() {
             <AppAvatar name={user?.name ?? '使用者'} size={32} />
           </Link>
         ) : (
-          <Button size="sm" onClick={openAuthDialog}>
-            登入
+          <Button size="sm" className="gap-1.5" onClick={openAuthDialog}>
+            <LogIn className="size-4" strokeWidth={1.5} />
+            登入 / 註冊
           </Button>
         )}
       </div>

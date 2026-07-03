@@ -1,7 +1,7 @@
-import { useNavigate } from 'react-router-dom'
-import { ArrowLeftRight, LifeBuoy, Unlock } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { ArrowLeftRight, LifeBuoy, Lock, Unlock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Logo } from '@/components/common/Logo'
+import { Logo, LogoMark } from '@/components/common/Logo'
 import {
   MascotHandoffDuo,
   MascotHandoff,
@@ -11,7 +11,6 @@ import {
 import { Reveal } from '@/components/common/Reveal'
 import { MiniCardMock } from '@/components/common/MiniCardMock'
 import { useAppState } from '@/hooks/useAppState'
-import { useAppDispatch } from '@/hooks/useAppDispatch'
 import { cn, staggerDelay } from '@/lib/utils'
 
 const PARTIES = [
@@ -89,9 +88,7 @@ function SectionHeading({ children, className }) {
 
 export default function HomePage() {
   const { isLoggedIn, user } = useAppState()
-  const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const openAuthDialog = () => dispatch({ type: 'OPEN_AUTH_DIALOG' })
 
   return (
     <div className="h-full overflow-y-auto">
@@ -132,13 +129,10 @@ export default function HomePage() {
             </Button>
           </div>
           {!isLoggedIn && (
-            <Button
-              variant="ghost"
-              className="mt-2 text-muted-foreground"
-              onClick={openAuthDialog}
-            >
-              登入解鎖邀請、聊天等功能
-            </Button>
+            <p className="mt-3 flex items-center justify-center gap-1.5 text-sm text-muted-foreground md:justify-start">
+              <Lock className="size-3.5 shrink-0" strokeWidth={1.5} />
+              登入後可解鎖邀請、收藏與聊天功能
+            </p>
           )}
         </div>
         <div
@@ -303,16 +297,31 @@ export default function HomePage() {
 
       {/* 9. Footer */}
       <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-4xl flex-col gap-8 px-6 py-10 sm:flex-row sm:justify-between">
+        <div className="mx-auto grid max-w-4xl gap-8 px-6 py-12 sm:grid-cols-[1.4fr_1fr_1fr]">
           <div className="max-w-sm">
-            <h4 className="text-sm font-bold">簡介</h4>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            <Logo size={22} />
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               CoTrace 是一個以「遞名片」為起點、保護個資、由人才主導價值的媒合平台，讓求才方主動找到你，用名片交換建立真實連結。
             </p>
           </div>
           <div>
-            <h4 className="text-sm font-bold">聯絡資訊</h4>
-            <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground">
+            <h4 className="text-sm font-bold">產品</h4>
+            <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
+              <li>
+                <Link to="/explore" className="hover:text-foreground">
+                  探索人才
+                </Link>
+              </li>
+              <li>
+                <Link to="/build" className="hover:text-foreground">
+                  建立名片
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-sm font-bold">聯絡我們</h4>
+            <ul className="mt-3 space-y-1.5 text-sm text-muted-foreground">
               <li>
                 <a href="#" className="hover:text-foreground">
                   Instagram
@@ -331,8 +340,10 @@ export default function HomePage() {
             </ul>
           </div>
         </div>
-        <div className="mx-auto max-w-4xl px-6 pb-10">
-          <Logo size={22} />
+        <div className="border-t border-border">
+          <div className="mx-auto flex max-w-4xl items-center gap-2 px-6 py-5 text-xs text-muted-foreground">
+            <LogoMark size={16} />© {new Date().getFullYear()} CoTrace. All rights reserved.
+          </div>
         </div>
       </footer>
     </div>
