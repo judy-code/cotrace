@@ -4,17 +4,24 @@ import { SlidersHorizontal } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { MasterDetailLayout } from '@/components/layout/MasterDetailLayout'
 import { TalentGrid } from '@/components/explore/TalentGrid'
+import { TalentSwipeStack } from '@/components/explore/TalentSwipeStack'
 import { JobPostGrid } from '@/components/explore/JobPostGrid'
 import { PerspectiveSwitcher } from '@/components/explore/PerspectiveSwitcher'
 import { FilterDrawer } from '@/components/explore/FilterDrawer'
 import { useAppState } from '@/hooks/useAppState'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 
 export default function ExplorePage() {
   const talentMatch = useMatch('/explore/:talentId')
   const jobMatch = useMatch('/explore/job/:jobId')
   const { explorePerspective, filterState } = useAppState()
   const [filterOpen, setFilterOpen] = useState(false)
-  const activeFilterCount = Object.values(filterState).filter(Boolean).length
+  const isDesktop = useMediaQuery('(min-width: 768px)')
+  const activeFilterCount =
+    Number(!!filterState.titleKw) +
+    Number(!!filterState.skill) +
+    Number(!!filterState.sal) +
+    (filterState.locs?.length ? 1 : 0)
 
   return (
     <>
@@ -35,8 +42,14 @@ export default function ExplorePage() {
                 <span className="hidden sm:inline">篩選{activeFilterCount ? ` (${activeFilterCount})` : ''}</span>
               </button>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto">
-              {explorePerspective === 'jobseek' ? <JobPostGrid /> : <TalentGrid />}
+            <div className={cn('min-h-0 flex-1', isDesktop ? 'overflow-y-auto' : 'overflow-hidden')}>
+              {explorePerspective === 'jobseek' ? (
+                <JobPostGrid />
+              ) : isDesktop ? (
+                <TalentGrid />
+              ) : (
+                <TalentSwipeStack />
+              )}
             </div>
           </div>
         }

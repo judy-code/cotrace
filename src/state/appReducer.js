@@ -37,7 +37,7 @@ export function appReducer(state, action) {
     case 'SET_FILTER_STATE':
       return { ...state, filterState: { ...state.filterState, ...action.payload } }
     case 'RESET_FILTER':
-      return { ...state, filterState: { titleKw: '', skill: '', loc: '', sal: '' } }
+      return { ...state, filterState: { titleKw: '', skill: '', locs: [], sal: '', salUnit: 'year' } }
 
     // ---- 探索視角 ----
     case 'SET_EXPLORE_PERSPECTIVE':

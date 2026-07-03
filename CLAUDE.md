@@ -116,7 +116,7 @@ npm run preview   # 預覽 build 產出
 ## 登入彈窗與訪客／會員頁面區分
 
 2026-07 改版：登入不再是進站前的強制關卡，而是右上角 Navbar 的次要動作。`Navbar.jsx`
-右上角（桌面）／抽屜選單底部（手機）依 `isLoggedIn` 顯示「登入」按鈕或使用者頭像；
+右上角（桌面）／抽屜選單底部（手機）依 `isLoggedIn` 顯示「登入 / 註冊」按鈕（含 `LogIn` icon）或使用者頭像；
 點擊登入按鈕 dispatch `{ type: 'OPEN_AUTH_DIALOG' }`，開啟全站共用（只在 `AppShell.jsx`
 掛載一次）的 `components/common/AuthDialog.jsx`（Google 登入 + Email 登入/註冊 Tabs，
 合併自舊版 `WelcomePage.jsx` 的 Google 按鈕與 `EmailAuthDialog.jsx`，兩者皆已刪除／
@@ -303,7 +303,9 @@ src/
   lib/          共用工具函式（cn()、genCode()、getSalaryHint()、getContactEmail/Display()、avatarPalette）
   data/         所有模擬資料（原型中寫死在 JS 全域變數的資料，原樣搬過來）
   state/        Context + reducer 狀態管理層
-  hooks/        useAppState / useAppDispatch / useDebounce / useMediaQuery / useAutocomplete
+  hooks/        useAppState / useAppDispatch / useDebounce / useMediaQuery / useAutocomplete /
+                useFilteredTalents（探索頁「我想求才」視角的篩選＋排序邏輯，TalentGrid 與
+                TalentSwipeStack 共用，避免兩處篩選邏輯分岔）
   components/
     ui/         shadcn 自動產生的基礎元件（不要手動大改，要改用 `npx shadcn add` 重新產生或用 className 覆寫）
     layout/     AppShell、Navbar（頂部導覽列，桌面水平／手機漢堡選單）、MasterDetailLayout、ResponsiveModal
@@ -346,6 +348,9 @@ server/         Email 帳號登入用的後端 API（Express + MySQL），見上
 | `rejectReasons.js` | 婉拒邀請的固定原因清單 |
 | `folderDefaults.js` | 名片夾預設資料夾名稱 |
 | `emailDomains.js` / `areaCodes.js` | 聯絡資料表單用的下拉選單資料 |
+| `taiwanDistricts.js` | 探索頁篩選「工作地點」用，22 縣市＋368 個行政區完整清單（資料來源：內政部
+  國土測繪中心官方 API `api.nlsc.gov.tw`，逐縣市查詢後彙整；縣市／行政區名稱一律用「台」而非
+  「臺」，跟 `talentPool.js` 既有資料用字一致），另外匯出 `OVERSEAS_LOCATION`（'國外'）常數 |
 
 **如何新增一位人才**：在 `talentPool.js` 的陣列裡加一個物件，欄位比照現有項目
 （`id`、`name`、`ini`、`title`、`code`、`level`、`company`、`lang`、`skills`、`bio`、
@@ -398,7 +403,9 @@ server/         Email 帳號登入用的後端 API（Express + MySQL），見上
   但未來頁面變多時可考慮用 `React.lazy()` 對各 `pages/*.jsx` 做 code splitting
 - `FilterDrawer` 沒有依探索視角切換欄位標籤（PRD 4.3.1 求才方／找工作兩視角欄位標籤略有不同），
   也沒有套用需求名片的預算篩選（需求名片預算是自由格式文字如「140–160萬/年薪」，
-  不是人選名片 `salary` 那種數字，現有 `sal` 篩選邏輯無法直接套用）
+  不是人選名片 `salary` 那種數字，現有 `sal` 篩選邏輯無法直接套用；2026-07 新增的月薪/年薪
+  切換與縣市/行政區篩選都只接到人選名片 `TalentGrid`／`TalentSwipeStack`，`JobPostGrid` 的
+  `loc` 比對維持原本的字串包含邏輯，`sal` 依然不適用）
 
 ### PRD 0.9.0 新功能（尚未排入開發，見上方「PRD 對照與目前實作範圍」）
 

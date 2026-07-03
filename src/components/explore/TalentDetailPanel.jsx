@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -11,8 +11,10 @@ import { InviteForm } from './InviteForm'
 export function TalentDetailPanel({ talent }) {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+  const location = useLocation()
   const requireAuth = useRequireAuth()
-  const [showInviteForm, setShowInviteForm] = useState(false)
+  // 手機版滑動卡片堆疊的「發送邀請」按鈕會帶 state.autoInvite 導頁過來，直接展開表單
+  const [showInviteForm, setShowInviteForm] = useState(!!location.state?.autoInvite)
 
   const handleKeep = () =>
     requireAuth(() => {

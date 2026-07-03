@@ -14,7 +14,9 @@ export function JobPostGrid() {
       const kw = filterState.skill.toLowerCase()
       if (!j.skills.some((s) => s.toLowerCase().includes(kw))) return false
     }
-    if (filterState.loc && !j.location.includes(filterState.loc)) return false
+    // location 是自由格式文字（例：「台北市（可遠端）」），跟 locs 比對用「是否包含」
+    // 而非完全相等，才能配對到選中的縣市/行政區
+    if (filterState.locs?.length && !filterState.locs.some((loc) => j.location.includes(loc))) return false
     return true
   })
 

@@ -192,6 +192,58 @@
 （`chromium.launch()` + 截圖）在桌面（1280×900）與手機（390×844）viewport 下實際操作
 過一輪，確認功能正常、無 console error。
 
+## 2026-07-03（續 2）— UI 改版八項＋篩選地點兩欄式選單
+
+使用者一次列出 8 項想改的 UI/UX 項目，先用 brainstorming skill 釐清幾個模糊的設計決策
+（登入/註冊切換樣式、手勢化收藏/跳過範圍、地點篩選分區範圍），排定由小到大的實作排程，
+逐項完成：
+
+- **通知未讀數字**：`Navbar.jsx` 的邀請數字 badge 加上 `isLoggedIn &&` 條件，訪客狀態不再
+  誤顯示數字（舊版不管有沒有登入都會算 `pendingCount`）
+- **登入按鈕**：桌面／手機都加上 `LogIn` icon，文字統一為「登入 / 註冊」
+- **首頁 Hero**：登入解鎖的 `Button`（原本可點擊觸發登入，跟 Navbar 登入按鈕功能重複）改成
+  不可互動的純說明文字（`Lock` icon＋灰階文字）
+- **登入/註冊切換**：`AuthDialog.jsx` 的 Tabs 只在該檔案內用 className 覆寫成膠囊滑塊
+  Segmented Control 外觀，沒有動共用的 `ui/tabs.jsx`（避免影響 `InvitesPage`／`CardBoxPage`
+  既有的方形分頁）
+- **首頁 Footer**：從兩欄＋孤立 logo 改成三欄（品牌/產品捷徑/聯絡我們）＋分隔線＋版權列
+- **薪資篩選**：新增月薪/年薪切換（沿用同一顆 Segmented Control 樣式），維持單一「不低於」
+  數字輸入，選月薪時篩選前 ×12 換算年薪比對（`state.filterState` 新增 `salUnit`）
+- **工作地點篩選**：
+  - 新增 `data/taiwanDistricts.js`，資料來源是內政部國土測繪中心官方 API
+    （`api.nlsc.gov.tw/other/ListCounty`、`ListTown1/{縣市代碼}`），逐縣市查詢彙整 22 縣市、
+    368 個行政區（總數與官方一致），縣市/行政區名稱統一用「台」跟 `talentPool.js` 既有資料一致
+  - `filterState.loc`（單一字串）改成 `filterState.locs`（陣列），`TalentGrid` 用精確比對、
+    `JobPostGrid` 因為 `location` 是自由格式文字（如「台北市（可遠端）」）改用包含比對
+  - **UI 兩次迭代**：第一版用 22 個 `<details>` 手風琴清單，使用者反饋「排版可以參考其他網站」
+    後改成左側縣市清單／右側行政區勾選的兩欄式選單（比照 104／1111 等人力銀行常見的地址選單
+    做法），並依使用者要求把「國外」移到最下面、新增「台灣（全選）」一鍵全選
+  - `talentPool.js` 4 筆範例資料的 `loc` 從縣市層級補到區級（如「台北市信義區」），才能展示
+    分區篩選效果
+  - `ExplorePage.jsx` 的 `activeFilterCount` 原本用 `Object.values(filterState).filter(Boolean).length`
+    算，改成陣列後這樣算會出錯（空陣列 `[]` 在 JS 是 truthy、`salUnit` 恆為 truthy 字串），
+    已改成明確列舉欄位的寫法
+- **探索頁手機版滑動卡片堆疊**：
+  - 新增 `hooks/useFilteredTalents.js`，把原本寫在 `TalentGrid.jsx` 裡的篩選＋排序邏輯抽出來，
+    給新元件 `TalentSwipeStack.jsx` 共用，避免兩處篩選邏輯分岔
+  - `TalentSwipeStack.jsx`：手機版（`useMediaQuery('(min-width: 768px)')` 判斷）取代
+    `TalentGrid`，桌面不受影響；用原生 Pointer Events（不是額外套件）做左右拖曳，拖過閾值
+    分別觸發跳過（`REMOVE_TALENT`）／收藏（`ADD_KEEP`）並飛出畫面，卡片下方保留 ✕／發送邀請／
+    ♥ 三顆按鈕作為非手勢備援；「發送邀請」需要填表單無法用手勢表達，改成 `navigate` 帶
+    `state: { autoInvite: true }` 到人選詳情頁自動展開 `InviteForm`（`TalentDetailPanel.jsx`
+    讀 `useLocation().state?.autoInvite` 決定 `showInviteForm` 初始值；滑動堆疊的「發送邀請」
+    按鈕本身仍包在 `requireAuth` 裡，避免訪客繞過登入門檻直接看到表單）
+  - 已決定過的候選人只存在元件本地 `decidedIds`（`Set`），跟全域 `talentPool`/`keepList` 狀態
+    分開，符合「這次瀏覽不再出現，但全域收藏/名片夾邏輯不變」的預期
+- **驗證方式**：`npm run lint` + `npm run build` 全數過關；用 Playwright 對桌面（1280×900）與
+  手機（390×844）viewport 實際操作（開啟篩選抽屜、切換縣市、勾選行政區、點「台灣（全選）」、
+  滑動/點按收藏跳過卡片、確認空狀態）截圖驗證，皆正常無 console error
+- **環境備註**：這台機器專案本身沒裝 Playwright（只有 `npx playwright` CLI 可查版本），
+  在專案資料夾外的暫存路徑寫的測試腳本 `require('playwright')` 會找不到模組（Node 模組解析
+  從腳本所在目錄往上找，不會找到專案的 `node_modules`）——要嘛把腳本複製進專案資料夾內執行，
+  要嘛先 `npm install --no-save playwright`（不會動到 `package.json`／`package-lock.json`）
+  再執行，兩者都測過可行
+
 ## 下一步待完成（建議優先順序，細節見 `CLAUDE.md` →「PRD 對照與目前實作範圍」）
 
 1. **面談與評分機制**：風險徽章 + 面談邀請卡片 + 多維度評分問卷 —— 量體最大，PRD 第五章整章，建議排最後（目前唯一還沒動工的 PRD 0.9.0 新功能大項）

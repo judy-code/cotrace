@@ -66,7 +66,7 @@ export function createInitialState() {
     keepList: [...INITIAL_KEEP_LIST],
     blockList: [...INITIAL_BLOCK_LIST],
     cardBoxList: [...INITIAL_CARD_BOX_LIST],
-    filterState: { titleKw: '', skill: '', loc: '', sal: '' },
+    filterState: { titleKw: '', skill: '', locs: [], sal: '', salUnit: 'year' },
     cardData: { ...SAMPLE_CARD_DATA },
     talentPool: [...INITIAL_TALENT_POOL],
     invites: [...INITIAL_INVITES],
