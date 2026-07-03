@@ -4,8 +4,8 @@ import { AppAvatar } from '@/components/common/AppAvatar'
 import { useAppState } from '@/hooks/useAppState'
 
 export function ProfileCard({ onEditCard, onEditContact }) {
-  const { cardData, isLoggedIn, user } = useAppState()
-  const displayName = isLoggedIn && user?.name ? user.name : '林雅涵'
+  const { cardData, user } = useAppState()
+  const displayName = user?.name ?? '使用者'
 
   return (
     <div className="rounded-xl border border-border p-4">

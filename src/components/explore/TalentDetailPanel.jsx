@@ -5,17 +5,20 @@ import { ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CardView } from '@/components/common/CardView'
 import { useAppDispatch } from '@/hooks/useAppDispatch'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 import { InviteForm } from './InviteForm'
 
 export function TalentDetailPanel({ talent }) {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+  const requireAuth = useRequireAuth()
   const [showInviteForm, setShowInviteForm] = useState(false)
 
-  const handleKeep = () => {
-    dispatch({ type: 'ADD_KEEP', talent })
-    toast(`${talent.name} 已加入收藏`)
-  }
+  const handleKeep = () =>
+    requireAuth(() => {
+      dispatch({ type: 'ADD_KEEP', talent })
+      toast(`${talent.name} 已加入收藏`)
+    })
 
   const handleSkip = () => {
     dispatch({ type: 'REMOVE_TALENT', id: talent.id })
@@ -44,7 +47,7 @@ export function TalentDetailPanel({ talent }) {
           <Button variant="outline" className="flex-1" onClick={handleSkip}>
             跳過
           </Button>
-          <Button className="flex-1" onClick={() => setShowInviteForm(true)}>
+          <Button className="flex-1" onClick={() => requireAuth(() => setShowInviteForm(true))}>
             發送邀請
           </Button>
         </div>

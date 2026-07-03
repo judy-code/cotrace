@@ -118,6 +118,80 @@
 - **已提交**：`git commit 91d8e8a`「品牌改版：套用新版 CoTrace logo、重製色彩與字體系統、
   導覽列改為頂部橫向排列」，尚未 push 到遠端
 
+## 2026-07-03 — 登入系統重構 + 首頁改為完整 landing page + 開發輔助工具
+
+大範圍改版，跨多輪使用者反饋迭代，以下整理成最終落地狀態（過程中的中間版本，例如首頁
+插畫從「線稿人物」改到「拼圖吉祥物」的兩輪嘗試，已不再是現況，不重複列出取捨過程）。
+
+### 登入重構：首頁併入 Navbar、右上角登入彈窗、訪客／會員頁面區分
+
+- 使用者反饋「登入不應該是進站前的全螢幕關卡」——原本獨立於 `AppShell` 外、強制選擇
+  登入或訪客模式的 `WelcomePage.jsx` 改寫成 `pages/HomePage.jsx`（一般行銷首頁，併入
+  `AppShell` 底下，全站都看得到 `Navbar`）
+- 新增全域登入彈窗：`state.authDialogOpen` + `OPEN_AUTH_DIALOG`/`CLOSE_AUTH_DIALOG`
+  action，`components/common/AuthDialog.jsx`（合併原本 `WelcomePage` 的 Google 登入按鈕
+  與獨立的 `EmailAuthDialog.jsx` 登入/註冊表單，兩者皆刪除／併入），只在 `AppShell.jsx`
+  掛載一次，任何元件都能 dispatch 觸發。`Navbar.jsx` 右上角（桌面）／抽屜底部（手機）
+  依 `isLoggedIn` 顯示登入按鈕或使用者頭像
+- 訪客／會員頁面正式區分（**過去 `isLoggedIn` 只有顯示文字差異，沒有任何實際攔截**，
+  這次補上）：
+  - `components/layout/RequireAuth.jsx` layout route，包住 `/invites`／`/cardbox`／
+    `/chat`／`/settings` 四條路由，未登入時 `<Outlet/>` 替換成 `LoginPromptCard`
+    「請先登入」提示卡（不用 redirect，網址仍可分享/重新整理）
+  - `hooks/useRequireAuth.js`，包住探索頁「收藏」「發送邀請」（`TalentDetailPanel.jsx`）
+    與「關注」（`JobPostDetailPanel.jsx`）動作按鈕，未登入時開登入彈窗並中斷動作
+  - `navItems.js` 加 `authRequired` 標記，`Navbar` 訪客狀態下在通知／名片夾／聊天旁
+    顯示 `Lock` 小圖示（純視覺提示，導頁仍正常，由 `RequireAuth` 接手）
+- 同步更新 `CLAUDE.md`「登入彈窗與訪客／會員頁面區分」一節、`Design.md` 導覽列／彈窗策略
+
+### 首頁改為完整 landing page（含品牌吉祥物插畫）
+
+- 使用者提供 `網站排版參考.pptx`（slide14~21 是首頁完整文案）與 `Desktop - 1.png`
+  視覺稿，先用 brainstorming skill 釐清範圍（段落／插畫風格／動態程度），文案取自 pptx
+  抽取出的原文（用 `perl` 解壓 `.pptx`（zip）讀 slide XML 的 `<a:t>` 節點取得，沒有用
+  lorem ipsum）
+- `src/pages/HomePage.jsx` 現況是 9 個區塊的完整長頁：Hero／介紹／人才方求才方雙方三卡／
+  語錄／人才方好處／求才方好處／三特色卡／結尾／footer；三方卡片用 Tailwind arbitrary
+  property `[clip-path:polygon(...)]` 做出參考稿的斜切邊緣質感，並疊一張 `MiniCardMock`
+  假名片預覽（手機版隱藏）
+- **插畫最終版是「拼圖吉祥物」**：使用者反饋「要有一個符合專案的吉祥物」後，`illustrations.jsx`
+  改成拼圖吉祥物系統——圓角方形本體 + 臉畫在正面 + 手是一顆借用 logo 拼圖中心榫接圓點視覺
+  語言的小圓球（「伸出榫接點＝伸手遞名片」的視覺雙關）。共用子元件 `MascotBody`／
+  `MascotHand`，四張插圖 `MascotHandoffDuo`（Hero）／`MascotHandoff`（人才方）／
+  `MascotSearch`（求才方）／`MascotExchange`（雙方），1:1 對應各區塊原本的呼叫位置
+- 新增 `hooks/useInView.js` + `components/common/Reveal.jsx` 做捲動觸發進場動畫
+  （IntersectionObserver，觸發一次不重播），沒有引入 Framer Motion
+- 同步更新 `Design.md`「首頁 landing page」「吉祥物：拼圖角色」兩節
+- **可重用的技巧**：比對使用者提供的長截圖（1440×7331）細節時，用 PowerShell
+  `System.Drawing` 把圖裁成小塊逐段比對（`Read` 工具會把整張圖等比縮小，直接讀長圖會
+  看不清局部），之後有類似「照著截圖排版/畫圖」的需求可以重用這個做法
+
+### 開發輔助工具：快速登入按鈕 + 每頁假資料
+
+- 使用者要「一個能登入看其他頁面的帳號」，釐清後發現這個 App 沒有 admin 角色概念
+  （求才/人才其實是 `explorePerspective` 視角切換，任何帳號都能自由用），且本機沒有
+  MySQL 可以跑真正的 Email 註冊（`C:\xampp` 不存在、`3306` port 探測不到）。在
+  `AuthDialog.jsx` 底部加一顆「以測試帳號登入」按鈕，只在 `import.meta.env.DEV` 為真時
+  渲染（`npm run build` 不會打包進去，已用 `grep` 確認），點下去直接 dispatch
+  `ENTER_APP`（純前端假帳號 `{ name: '測試帳號', email: 'dev-test@local', source: 'dev' }`，
+  不呼叫 API、不寫資料庫）
+- 使用者接著要求「每一個頁面都要有假資料可操作瀏覽」，盤點後發現名片夾／已邀請／
+  需求名片／關注中需求等清單原本都是空陣列，要走過實際操作才會有內容。新增 4 個資料檔
+  （`sampleProfile.js`／`cardBoxSeed.js`／`sentInvitesSeed.js`／`jobCardsSeed.js`），
+  `chatThreads.js` 從 1 筆擴充到 2 筆，`initialState.js` 的 `createInitialState()`
+  全面接上；每筆假資料的欄位形狀都對照 `appReducer.js` 對應 action 實際產生的形狀去
+  對齊。`blankCardData()`／`blankJobCardData()` 兩個「空白」函式維持原樣，只有
+  `RESET_CARD_DATA` 與建立名片精靈的「新增」流程還會用到
+- 同步更新 `CLAUDE.md`「登入彈窗與訪客／會員頁面區分」「模擬資料清單」兩節
+- **環境備註**：這台機器 `npm run dev`（不加 `--host`）只 bind IPv6（`::1`），Playwright
+  對 `localhost`/`[::1]` 連線會卡住逾時（但 `curl` 正常，容易誤判成程式碼問題）——一律改用
+  `npx vite --host 127.0.0.1` 啟動、Playwright 也連 `http://127.0.0.1:5173` 才穩定；
+  若之後 Playwright 連 dev server 又卡住但 curl 正常，先檢查是不是這個綁定問題
+
+驗證方式全數統一：每個子項都跑過 `npm run lint` + `npm run build`，並用 Playwright
+（`chromium.launch()` + 截圖）在桌面（1280×900）與手機（390×844）viewport 下實際操作
+過一輪，確認功能正常、無 console error。
+
 ## 下一步待完成（建議優先順序，細節見 `CLAUDE.md` →「PRD 對照與目前實作範圍」）
 
 1. **面談與評分機制**：風險徽章 + 面談邀請卡片 + 多維度評分問卷 —— 量體最大，PRD 第五章整章，建議排最後（目前唯一還沒動工的 PRD 0.9.0 新功能大項）

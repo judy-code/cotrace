@@ -92,22 +92,56 @@ npm run preview   # 預覽 build 產出
 
 | 路徑 | 頁面元件 | 說明 |
 |---|---|---|
-| `/` | `pages/WelcomePage.jsx` | 歡迎頁，不套用 AppShell（沒有頂部導覽列） |
-| `/build` | `pages/BuildPage.jsx` | 建立名片三步驟精靈 |
-| `/explore` | `pages/ExplorePage.jsx` | 探索頁（人才列表），桌面版與詳情頁組成主從分割版面 |
-| `/explore/:talentId` | `pages/TalentDetailPage.jsx` | 人才詳情（`/explore` 的巢狀路由） |
-| `/explore/job/:jobId` | `pages/JobPostDetailPage.jsx` | 需求名片詳情（`/explore` 的巢狀路由，「我是人才」視角用，含「關注」CTA） |
-| `/invites` | `pages/InvitesPage.jsx` | 通知頁（邀請／已邀請／關注三分頁，對應 PRD 6.5；路徑本身沿用 `/invites`，未跟著改名） |
-| `/cardbox` | `pages/CardBoxPage.jsx` | 名片夾（名片夾／收藏／黑名單三分頁） |
-| `/chat` | `pages/ChatPage.jsx` | 聊天列表，桌面版與聊天視窗組成主從分割版面 |
-| `/chat/:threadId` | `pages/ChatThreadPage.jsx` | 聊天視窗（`/chat` 的巢狀路由） |
-| `/settings` | `pages/SettingsPage.jsx` | 設置頁 |
+| `/` | `pages/HomePage.jsx` | 行銷首頁（hero + CTA），訪客／會員看到同一頁，僅 CTA 文案依登入狀態微調 |
+| `/build` | `pages/BuildPage.jsx` | 建立名片三步驟精靈，訪客可用 |
+| `/explore` | `pages/ExplorePage.jsx` | 探索頁（人才列表），訪客可瀏覽；桌面版與詳情頁組成主從分割版面 |
+| `/explore/:talentId` | `pages/TalentDetailPage.jsx` | 人才詳情（`/explore` 的巢狀路由）；「收藏」「發送邀請」需登入 |
+| `/explore/job/:jobId` | `pages/JobPostDetailPage.jsx` | 需求名片詳情（`/explore` 的巢狀路由，「我是人才」視角用）；「關注」需登入 |
+| `/invites` | `pages/InvitesPage.jsx` | 通知頁（邀請／已邀請／關注三分頁，對應 PRD 6.5）；**需登入** |
+| `/cardbox` | `pages/CardBoxPage.jsx` | 名片夾（名片夾／收藏／黑名單三分頁）；**需登入** |
+| `/chat` | `pages/ChatPage.jsx` | 聊天列表，桌面版與聊天視窗組成主從分割版面；**需登入** |
+| `/chat/:threadId` | `pages/ChatThreadPage.jsx` | 聊天視窗（`/chat` 的巢狀路由）；**需登入** |
+| `/settings` | `pages/SettingsPage.jsx` | 設置頁；**需登入** |
 
-`/` 以外的所有路由都包在 `components/layout/AppShell.jsx` 這個版面路由（layout route）底下，
+所有路由都包在 `components/layout/AppShell.jsx` 這個版面路由（layout route）底下，
 提供頂部固定導覽列 `Navbar`（桌面版水平排列導覽項目；手機版收合成漢堡選單，從左側滑出，
-見 `Design.md`「導覽列」一節）。彈窗類 UI（聯絡資料編輯、實名認證、
+見 `Design.md`「導覽列」一節），並在底部掛載全站共用的 `AuthDialog`。標「需登入」的五條
+路由額外包在 `components/layout/RequireAuth.jsx` 這層 layout route 底下：未登入時
+`<Outlet/>` 直接替換成 `LoginPromptCard`（「請先登入」提示卡＋登入按鈕），保留網址可
+分享／重新整理，不用 redirect。彈窗類 UI（登入/註冊、聯絡資料編輯、實名認證、
 篩選面板、婉拒原因、資料夾選擇／管理、發送邀請）**都不是路由**，而是各元件內部的
-`useState` 控制開關，用 `ResponsiveModal` 統一處理桌面 Dialog／手機 Drawer 的切換。
+`useState` 控制開關，用 `ResponsiveModal` 統一處理桌面 Dialog／手機 Drawer 的切換
+（登入/註冊彈窗 `AuthDialog` 例外，開關狀態放在全域 `state.authDialogOpen`，見下一節）。
+
+## 登入彈窗與訪客／會員頁面區分
+
+2026-07 改版：登入不再是進站前的強制關卡，而是右上角 Navbar 的次要動作。`Navbar.jsx`
+右上角（桌面）／抽屜選單底部（手機）依 `isLoggedIn` 顯示「登入」按鈕或使用者頭像；
+點擊登入按鈕 dispatch `{ type: 'OPEN_AUTH_DIALOG' }`，開啟全站共用（只在 `AppShell.jsx`
+掛載一次）的 `components/common/AuthDialog.jsx`（Google 登入 + Email 登入/註冊 Tabs，
+合併自舊版 `WelcomePage.jsx` 的 Google 按鈕與 `EmailAuthDialog.jsx`，兩者皆已刪除／
+併入）。彈窗開關狀態放進 `state.authDialogOpen`（`OPEN_AUTH_DIALOG`/`CLOSE_AUTH_DIALOG`
+action），而不是元件本地 `useState`，因為訪客要能從很多不同地方觸發登入（Navbar、
+`RequireAuth` 提示卡、探索頁動作按鈕）。登入成功後**留在原本瀏覽的頁面**，不強制導頁。
+
+需要登入的功能分兩層攔截：
+
+- **整頁**（通知／名片夾／聊天／設置）：`RequireAuth.jsx` layout route，見上一節
+- **頁面內單一動作**（探索頁「收藏」「發送邀請」「關注」）：`hooks/useRequireAuth.js`，
+  未登入時 dispatch `OPEN_AUTH_DIALOG` 並中斷動作，已登入才放行
+
+`Navbar.jsx` 的 `NAV_ITEMS`（`components/layout/navItems.js`）用 `authRequired: true`
+標記通知／名片夾／聊天三項，訪客狀態下項目旁會多顯示一個 `Lock` 圖示（純視覺提示，
+點擊仍正常導頁，由 `RequireAuth` 接手擋下，不在 Navbar 層攔截）。
+
+**開發用快速登入**（2026-07 新增）：`AuthDialog.jsx` 底部有一顆「以測試帳號登入」按鈕，
+只在 `import.meta.env.DEV` 為真時渲染（`npm run dev` 才有，`npm run build` 產出的正式版
+不會打包進去，已用 `grep` 確認產出的 JS 裡沒有這段文字）。點下去直接
+`dispatch({ type: 'ENTER_APP', loggedIn: true, user: { name: '測試帳號', email:
+'dev-test@local', source: 'dev' } })`，純前端假帳號，不呼叫任何 API、不寫進資料庫，跟其餘
+模擬資料一樣重新整理就消失。用途：本機開發時不需要真的申請 Google OAuth Client ID 或架設
+MySQL，也能快速登入查看通知／名片夾／聊天／設置等需要登入才能看到的頁面。`source: 'dev'`
+不是 `'local'`，所以 `AccountCard.jsx` 登出時不會誤呼叫後端 `logoutAccount()` API。
 
 ## 狀態管理
 
@@ -156,7 +190,7 @@ npm run preview   # 預覽 build 產出
 
 ## Google 登入
 
-`src/pages/WelcomePage.jsx` 用 `@react-oauth/google` 的 `useGoogleLogin`（implicit flow）
+`src/components/common/AuthDialog.jsx` 用 `@react-oauth/google` 的 `useGoogleLogin`（implicit flow）
 串接真正的 Google OAuth：使用者點擊按鈕 → Google 回傳 `access_token` →
 `src/lib/googleAuth.js` 的 `fetchGoogleProfile()` 呼叫 Google `userinfo` endpoint
 取得 `{ name, email, picture, sub, source: 'google' }` → 存進 `state.user`。
@@ -175,7 +209,7 @@ npm run preview   # 預覽 build 產出
   3. 「已授權的 JavaScript 來源」沒加到目前開發用的網址
      （例如 `http://localhost:5173`，注意 port 要跟 `npm run dev` 印出來的一致）
 - 登出：`src/components/settings/AccountCard.jsx` 的登出按鈕會 dispatch `LOGOUT` action
-  並導回歡迎頁
+  並導回首頁
 
 ## 帳號密碼登入與後端（`server/`）
 
@@ -198,9 +232,9 @@ cookie（前端 JS 拿不到、也不用管，`fetch` 帶 `credentials: 'include
 還有效就自動還原登入狀態（所以帳號登入重新整理頁面不會被登出，其餘資料還是會重置）。
 
 **前端串接**：`src/lib/api.js` 封裝了 `registerAccount` / `loginAccount` /
-`logoutAccount` / `fetchCurrentUser` 四支 fetch；`src/components/common/EmailAuthDialog.jsx`
-是 WelcomePage 上「以 Email 帳號登入／註冊」按鈕開出來的 Tabs 表單，成功後一樣
-dispatch `ENTER_APP`（`user.source` 會是 `'local'`）。
+`logoutAccount` / `fetchCurrentUser` 四支 fetch；Email 登入/註冊的 Tabs 表單是
+`src/components/common/AuthDialog.jsx` 的一部分（見上方「登入彈窗與訪客／會員頁面
+區分」一節），成功後一樣 dispatch `ENTER_APP`（`user.source` 會是 `'local'`）。
 
 **開發環境設定（第一次要做的事）**：
 
@@ -292,7 +326,16 @@ server/         Email 帳號登入用的後端 API（Express + MySQL），見上
 | `jobCardPool.js` | 探索頁「我是人才」視角可瀏覽的 4 張範例需求名片（別人發布的，非自己的 `jobCards`） |
 | `receivedFollows.js` | 2 筆模擬「別人關注你需求名片」的通知，`talentId` 對應 `talentPool.js` 既有人才 |
 | `invites.js` | 3 筆範例邀請（含完整的邀請人名片資料） |
-| `chatThreads.js` | 1 筆範例聊天室（帶一個尚未處理的個資解鎖請求） |
+| `chatThreads.js` | 2 筆範例聊天室：一筆帶尚未處理的個資解鎖請求（`unlockSent: true, unlockDone: false`），
+  一筆已完成解鎖的對話（`unlockDone: true`），`name` 分別對應 `invites.js`／`cardBoxSeed.js` 的人名，
+  讓點聊天室頭像時能比對到完整名片（見 `ChatThreadView.buildThreadCard()`） |
+| `sampleProfile.js` | 「我」的名片草稿（`SAMPLE_CARD_DATA`）與聯絡資料（`SAMPLE_CONTACT_DATA`）範例，
+  登入後直接看到填好的設置頁／名片預覽，不用先跑一遍建立名片精靈 |
+| `cardBoxSeed.js` | 名片夾頁三分頁的範例資料：`INITIAL_CARD_BOX_LIST`（已交換，2 筆）／
+  `INITIAL_KEEP_LIST`（收藏，2 筆，其中一筆 `inviteSent: true` 展示「邀請中」狀態）／
+  `INITIAL_BLOCK_LIST`（黑名單，1 筆） |
+| `sentInvitesSeed.js` | 通知頁「已邀請」分頁的範例資料（2 筆），`talentId` 對應 `talentPool.js` |
+| `jobCardsSeed.js` | 設置頁「需求名片」管理入口的範例資料（我自己發布的 2 張需求名片） |
 | `companies.js` | 公司自動完成用的台灣公司名稱清單（本地比對，見下方「哪些是模擬的」） |
 | `languages.js` | 語言自動完成清單（~50 種語言） |
 | `values.js` | 4 組價值觀分類標籤 |
@@ -308,6 +351,16 @@ server/         Email 帳號登入用的後端 API（Express + MySQL），見上
 （`id`、`name`、`ini`、`title`、`code`、`level`、`company`、`lang`、`skills`、`bio`、
 `goodAt`、`wantTo`、`values`、`ai`、`salary`、`loc`）。`ai` 是頭像色票索引（0-4 循環），
 `code` 建議用 `genCode()`（`src/lib/code.js`）產生。
+
+**2026-07：`createInitialState()`（`src/state/initialState.js`）預設把每一份清單都塞滿範例
+資料**（`cardBoxList`／`keepList`／`blockList`／`sentInvites`／`jobCards`／
+`followedJobCards`／`cardData`／`contactData`，`isVerified` 也預設 `true`），不再是空陣列/
+空白表單。原因：這些清單原本要透過「同意邀請」「收藏」「建立名片」等操作才會有內容，
+剛登入（含開發用快速登入）時大部分頁面都是空的，不利於瀏覽/測試既有功能。真正要清空
+重新開始的話，各頁面既有的「刪除」「取消收藏」「取消黑名單」等操作都正常運作，會直接
+從這份初始清單移除；`blankCardData()`／`blankJobCardData()` 兩個「空白」函式維持原樣，
+只有它們是`初始狀態`跟`建立名片精靈`真正需要「乾淨草稿」時才用（`RESET_CARD_DATA` action
+與精靈的 `id: null` 新增流程）。
 
 ## 哪些功能是模擬／非真實的
 

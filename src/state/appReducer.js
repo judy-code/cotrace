@@ -7,6 +7,10 @@ export function appReducer(state, action) {
       return { ...state, isLoggedIn: action.loggedIn, user: action.user ?? null }
     case 'LOGOUT':
       return { ...state, isLoggedIn: false, user: null }
+    case 'OPEN_AUTH_DIALOG':
+      return { ...state, authDialogOpen: true }
+    case 'CLOSE_AUTH_DIALOG':
+      return { ...state, authDialogOpen: false }
 
     case 'SET_CARD_DATA':
       return { ...state, cardData: action.payload }

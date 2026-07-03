@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import { Link, NavLink, useLocation } from 'react-router-dom'
-import { Menu, Settings, SlidersHorizontal } from 'lucide-react'
+import { Link, NavLink } from 'react-router-dom'
+import { Lock, Menu, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAppState } from '@/hooks/useAppState'
+import { useAppDispatch } from '@/hooks/useAppDispatch'
 import { AppAvatar } from '@/components/common/AppAvatar'
 import { Logo } from '@/components/common/Logo'
+import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
-import { FilterDrawer } from '@/components/explore/FilterDrawer'
 import { NAV_ITEMS } from './navItems'
 
 /**
@@ -15,13 +16,12 @@ import { NAV_ITEMS } from './navItems'
  */
 export function Navbar() {
   const state = useAppState()
-  const location = useLocation()
-  const [filterOpen, setFilterOpen] = useState(false)
+  const dispatch = useAppDispatch()
   const [menuOpen, setMenuOpen] = useState(false)
 
+  const { isLoggedIn, user } = state
   const pendingCount = state.invites.filter((i) => i.status === 'pending').length
-  const isExplore = location.pathname.startsWith('/explore')
-  const activeFilterCount = Object.values(state.filterState).filter(Boolean).length
+  const openAuthDialog = () => dispatch({ type: 'OPEN_AUTH_DIALOG' })
 
   const desktopLinkClass = ({ isActive }) =>
     cn(
@@ -56,12 +56,15 @@ export function Navbar() {
               <Logo size={24} />
             </Link>
             <nav className="flex flex-1 flex-col gap-1 px-3">
-              {NAV_ITEMS.map(({ to, label, icon: Icon, badge }) => (
+              {NAV_ITEMS.map(({ to, label, icon: Icon, badge, authRequired }) => (
                 <NavLink key={to} to={to} className={drawerLinkClass} onClick={() => setMenuOpen(false)}>
                   <Icon className="size-4.5" strokeWidth={1.5} />
                   {label}
+                  {authRequired && !isLoggedIn && (
+                    <Lock className="ml-auto size-3.5 shrink-0 text-muted-foreground" strokeWidth={1.5} />
+                  )}
                   {badge && pendingCount > 0 && (
-                    <span className="ml-auto flex size-5 items-center justify-center rounded-full bg-primary text-[11px] font-medium text-primary-foreground">
+                    <span className="animate-in zoom-in-50 ml-auto flex size-5 items-center justify-center rounded-full bg-primary text-[11px] font-medium text-primary-foreground duration-300">
                       {pendingCount}
                     </span>
                   )}
@@ -69,11 +72,23 @@ export function Navbar() {
               ))}
             </nav>
             <div className="border-t border-border p-3">
-              <NavLink to="/settings" className={drawerLinkClass} onClick={() => setMenuOpen(false)}>
-                <AppAvatar name="林雅涵" size={28} />
-                <span className="truncate">林雅涵</span>
-                <Settings className="ml-auto size-4 shrink-0" strokeWidth={1.5} />
-              </NavLink>
+              {isLoggedIn ? (
+                <NavLink to="/settings" className={drawerLinkClass} onClick={() => setMenuOpen(false)}>
+                  <AppAvatar name={user?.name ?? '使用者'} size={28} />
+                  <span className="truncate">{user?.name ?? '使用者'}</span>
+                  <Settings className="ml-auto size-4 shrink-0" strokeWidth={1.5} />
+                </NavLink>
+              ) : (
+                <Button
+                  className="w-full"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    openAuthDialog()
+                  }}
+                >
+                  登入 / 註冊
+                </Button>
+              )}
             </div>
           </div>
         </SheetContent>
@@ -84,12 +99,15 @@ export function Navbar() {
       </Link>
 
       <nav className="hidden items-center gap-1 md:flex">
-        {NAV_ITEMS.map(({ to, label, icon: Icon, badge }) => (
+        {NAV_ITEMS.map(({ to, label, icon: Icon, badge, authRequired }) => (
           <NavLink key={to} to={to} className={desktopLinkClass}>
             <Icon className="size-4" strokeWidth={1.5} />
             {label}
+            {authRequired && !isLoggedIn && (
+              <Lock className="size-3 text-muted-foreground" strokeWidth={1.5} />
+            )}
             {badge && pendingCount > 0 && (
-              <span className="flex size-4.5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+              <span className="animate-in zoom-in-50 flex size-4.5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground duration-300">
                 {pendingCount}
               </span>
             )}
@@ -98,25 +116,16 @@ export function Navbar() {
       </nav>
 
       <div className="ml-auto flex items-center gap-4">
-        {isExplore && (
-          <button
-            type="button"
-            onClick={() => setFilterOpen(true)}
-            className={cn(
-              'flex items-center gap-1.5 text-sm',
-              activeFilterCount ? 'text-primary' : 'text-muted-foreground'
-            )}
-          >
-            <SlidersHorizontal className="size-4" strokeWidth={1.5} />
-            <span className="hidden sm:inline">篩選{activeFilterCount ? ` (${activeFilterCount})` : ''}</span>
-          </button>
+        {isLoggedIn ? (
+          <Link to="/settings" aria-label="設置">
+            <AppAvatar name={user?.name ?? '使用者'} size={32} />
+          </Link>
+        ) : (
+          <Button size="sm" onClick={openAuthDialog}>
+            登入
+          </Button>
         )}
-        <Link to="/settings" aria-label="設置">
-          <AppAvatar name="林雅涵" size={32} />
-        </Link>
       </div>
-
-      <FilterDrawer open={filterOpen} onOpenChange={setFilterOpen} />
     </header>
   )
 }

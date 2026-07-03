@@ -5,22 +5,25 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useAppState } from '@/hooks/useAppState'
 import { useAppDispatch } from '@/hooks/useAppDispatch'
+import { useRequireAuth } from '@/hooks/useRequireAuth'
 
 export function JobPostDetailPanel({ jobPost }) {
   const { followedJobCards } = useAppState()
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+  const requireAuth = useRequireAuth()
   const isFollowed = followedJobCards.some((j) => j.id === jobPost.id)
 
-  const toggleFollow = () => {
-    if (isFollowed) {
-      dispatch({ type: 'UNFOLLOW_JOB_CARD', id: jobPost.id })
-      toast('已取消關注')
-    } else {
-      dispatch({ type: 'FOLLOW_JOB_CARD', jobCard: jobPost })
-      toast('已關注這則需求名片')
-    }
-  }
+  const toggleFollow = () =>
+    requireAuth(() => {
+      if (isFollowed) {
+        dispatch({ type: 'UNFOLLOW_JOB_CARD', id: jobPost.id })
+        toast('已取消關注')
+      } else {
+        dispatch({ type: 'FOLLOW_JOB_CARD', jobCard: jobPost })
+        toast('已關注這則需求名片')
+      }
+    })
 
   return (
     <div className="flex h-full flex-col">
